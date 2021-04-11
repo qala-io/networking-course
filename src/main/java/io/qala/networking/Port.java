@@ -3,7 +3,7 @@ package io.qala.networking;
 /**
  * TCP or Switch port
  */
-class Port {
+public class Port {
     private final int num;
 
     public Port(int num) {

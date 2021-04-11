@@ -9,10 +9,11 @@ public class L2Packet {
         this.dst = dst;
         this.data = data;
     }
-    public Mac getSrc() {
+
+    public Mac src() {
         return src;
     }
-    public Mac getDst() {
+    public Mac dst() {
         return dst;
     }
 }
