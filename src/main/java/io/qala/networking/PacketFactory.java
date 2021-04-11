@@ -2,6 +2,7 @@ package io.qala.networking;
 
 import io.qala.networking.l2.L2Packet;
 import io.qala.networking.l2.Mac;
+import io.qala.networking.l3.IpAddress;
 
 public class PacketFactory {
     /**

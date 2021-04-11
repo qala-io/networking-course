@@ -1,4 +1,4 @@
-package io.qala.networking;
+package io.qala.networking.l3;
 
 import java.nio.charset.StandardCharsets;
 

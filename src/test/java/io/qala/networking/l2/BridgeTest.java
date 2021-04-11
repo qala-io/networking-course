@@ -1,6 +1,6 @@
 package io.qala.networking.l2;
 
-import io.qala.networking.IpAddress;
+import io.qala.networking.l3.IpAddress;
 import io.qala.networking.PacketFactory;
 import io.qala.networking.Port;
 import org.junit.Test;
