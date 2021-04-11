@@ -1,14 +1,14 @@
 package io.qala.networking.l2;
 
-import io.qala.networking.L1Endpoint;
+import io.qala.networking.Nic;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SpyEndpoint implements L1Endpoint {
+public class SpyNic implements Nic {
     private final List<L2Packet> receivedPackets = new ArrayList<>();
 
-    @Override public void receive(L2Packet packet) {
+    @Override public void process(L2Packet packet) {
         receivedPackets.add(packet);
     }
     public int size() {

@@ -1,7 +1,7 @@
 package io.qala.networking.l2;
 
 import io.qala.networking.Port;
-import io.qala.networking.L1Endpoint;
+import io.qala.networking.Nic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +16,7 @@ class Bridge {
     /**
      * To list NICs who use the bridge: {@code ip link show master <bridge name>}
      */
-    private final Map<Port, L1Endpoint> ports = new HashMap<>();
+    private final Map<Port, Nic> ports = new HashMap<>();
     private final Map<Mac, Port> routing = new HashMap<>();
 
     void receive(Port srcPort, L2Packet packet) {
@@ -30,10 +30,10 @@ class Bridge {
                     send(next, packet);
     }
     void send(Port port, L2Packet packet) {
-        ports.get(port).receive(packet);
+        ports.get(port).process(packet);
         LOGGER.trace("Sending L2 package to: {}", packet.dst());
     }
-    public void attachWire(Port port, L1Endpoint endpoint) {
+    public void attachWire(Port port, Nic endpoint) {
         ports.put(port, endpoint);
     }
 }

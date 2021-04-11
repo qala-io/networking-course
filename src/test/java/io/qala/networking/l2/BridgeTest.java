@@ -15,9 +15,9 @@ public class BridgeTest {
         Bridge bridge = new Bridge();
 
         Port port0 = new Port(0);
-        SpyEndpoint port0Endpoint = new SpyEndpoint(),
-                    port1Endpoint = new SpyEndpoint(),
-                    port2Endpoint = new SpyEndpoint();
+        SpyNic port0Endpoint = new SpyNic(),
+                    port1Endpoint = new SpyNic(),
+                    port2Endpoint = new SpyNic();
         bridge.attachWire(port0, port0Endpoint);
         bridge.attachWire(new Port(1), port1Endpoint);
         bridge.attachWire(new Port(2), port2Endpoint);
