@@ -1,7 +1,6 @@
-package io.qala.networking.l3;
+package io.qala.networking.ipv4;
 
 import io.qala.networking.l2.L2Packet;
-import io.qala.networking.l3.IpAddress;
 
 public class IpPacket {
     private final L2Packet l2Packet;
@@ -14,5 +13,8 @@ public class IpPacket {
     }
     public IpAddress src() {
         return null;
+    }
+    public boolean isArp() {
+        throw new UnsupportedOperationException();
     }
 }

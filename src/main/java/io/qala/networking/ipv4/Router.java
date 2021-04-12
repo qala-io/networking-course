@@ -1,4 +1,4 @@
-package io.qala.networking.l3;
+package io.qala.networking.ipv4;
 
 import io.qala.networking.Nic;
 
@@ -6,5 +6,5 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Router {
-    private final Map<IpMask, Nic> table = new HashMap<>();
+    private final Map<NetworkMask, Nic> table = new HashMap<>();
 }

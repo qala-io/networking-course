@@ -1,7 +1,7 @@
 package io.qala.networking;
 
-import io.qala.networking.l3.IpPacket;
-import io.qala.networking.l3.Router;
+import io.qala.networking.ipv4.IpPacket;
+import io.qala.networking.ipv4.Router;
 
 import java.util.ArrayList;
 import java.util.List;

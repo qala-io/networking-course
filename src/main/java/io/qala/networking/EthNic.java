@@ -1,8 +1,8 @@
 package io.qala.networking;
 
 import io.qala.networking.l2.L2Packet;
-import io.qala.networking.l3.IpAddress;
-import io.qala.networking.l3.IpPacket;
+import io.qala.networking.ipv4.IpAddress;
+import io.qala.networking.ipv4.IpPacket;
 
 public class EthNic implements Nic {
     private final IpAddress address;
@@ -19,9 +19,15 @@ public class EthNic implements Nic {
     @Override public void process(L2Packet l2Packet) {
         IpPacket ipPacket = new IpPacket(l2Packet);
         boolean targetedThisNic = ipPacket.dst().equals(this.address);
-        if(targetedThisNic)
+        if(targetedThisNic && ipPacket.isArp())// ARP is not an IP packet?
+            throw new UnsupportedOperationException();
+//            send(new IpPacket(null));
+        else if(targetedThisNic)
             kernel.process(ipPacket);
         else if(ipForward)
             kernel.route(ipPacket);
+    }
+    public void send(IpPacket ipPacket) {
+
     }
 }
