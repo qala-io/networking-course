@@ -18,13 +18,6 @@ public class Bytes {
         this.bytes = bytes;
     }
 
-    public static Bytes highBits(int nOfBytes, int nOfOnes) {
-        byte[] bytes = new byte[nOfBytes];
-        for (int bit = 0; bit < nOfOnes; bit++)
-            bytes[bit/8] |= 1 << (bit%8);
-        return new Bytes(bytes);
-    }
-
     public Bytes append(Bytes bytes) {
         return append(bytes.getInternal());
     }
@@ -73,6 +66,24 @@ public class Bytes {
         byte[] b = new byte[n];
         new Random().nextBytes(b);
         return new Bytes(b);
+    }
+    public int toInt() {
+        if(bytes.length != 4)
+            throw new IllegalStateException("Int requires 4 bytes, actual: " + this);
+        int result = 0;
+        for (byte next : bytes) {
+            result <<= 8;
+            result |= Byte.toUnsignedInt(next);
+        }
+        return result;
+    }
+    public static Bytes fromInt(int v) {
+        byte[] bytes = new byte[4];
+        for (int i = bytes.length - 1; i >= 0; i--) {
+            bytes[i] = (byte) (v & 0xff);
+            v >>>= 8;
+        }
+        return new Bytes(bytes);
     }
 
     public static String toHex(byte b) {

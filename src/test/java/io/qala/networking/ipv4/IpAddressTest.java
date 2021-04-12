@@ -11,4 +11,12 @@ public class IpAddressTest {
         assertEquals("255.0.1.68", ipAddress.toString());
         assertEquals(ipAddress, new IpAddress(ipAddress.toString()));
     }
+    @Test public void strings() {
+        assertEquals(new Bytes(168, 0, 12, 255), new IpAddress("168.0.12.255").toBytes());
+    }
+    @Test public void acceptsInt() {
+        IpAddress ipAddress = new IpAddress(new Bytes(255, 0, 1, 68).toInt());
+        assertEquals("255.0.1.68", ipAddress.toString());
+        assertEquals(ipAddress, new IpAddress(ipAddress.toString()));
+    }
 }

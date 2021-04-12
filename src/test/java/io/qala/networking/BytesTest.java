@@ -14,7 +14,10 @@ public class BytesTest {
     @Test public void andsTwoByteArrays() {
         assertEquals(new Bytes(0, 0, 2), new Bytes(0, 1, 2).and(new Bytes(1, 2, 6)));
     }
-    @Test public void generatesBitsWithHigh1() {
-        assertEquals(new Bytes(Bytes.FF, 128), Bytes.highBits(2, 9));
+    @Test public void canGenerateIntFromBytes() {
+        int integer = 0x01020304;
+        Bytes bytes = new Bytes(1, 2, 3, 4);
+        assertEquals(Integer.toHexString(integer), Integer.toHexString(bytes.toInt()));
+        assertEquals(bytes, Bytes.fromInt(integer));
     }
 }
