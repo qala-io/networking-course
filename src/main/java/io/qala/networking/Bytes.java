@@ -18,11 +18,11 @@ public class Bytes {
         this.bytes = bytes;
     }
 
-    public static byte[] highBits(int nOfBytes, int nOfOnes) {
+    public static Bytes highBits(int nOfBytes, int nOfOnes) {
         byte[] bytes = new byte[nOfBytes];
         for (int bit = 0; bit < nOfOnes; bit++)
             bytes[bit/8] |= 1 << (bit%8);
-        return bytes;
+        return new Bytes(bytes);
     }
 
     public Bytes append(Bytes bytes) {
@@ -37,7 +37,26 @@ public class Bytes {
     public byte[] getInternal() {
         return bytes;
     }
+    public Bytes or(Bytes o) {
+        if(o.size() != size())
+            throw new IllegalArgumentException("Bytes are of different lengths: " + size() + " and " + o.size());
+        byte[] result = new byte[size()];
+        for (int i = 0; i < bytes.length; i++)
+            result[i] = (byte) (bytes[i] | o.bytes[i]);
+        return new Bytes(result);
+    }
+    public Bytes and(Bytes o) {
+        if(o.size() != size())
+            throw new IllegalArgumentException("Bytes are of different lengths: " + size() + " and " + o.size());
+        byte[] result = new byte[size()];
+        for (int i = 0; i < bytes.length; i++)
+            result[i] = (byte) (bytes[i] & o.bytes[i]);
+        return new Bytes(result);
+    }
 
+    public int size() {
+        return bytes.length;
+    }
     @Override public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -47,7 +66,9 @@ public class Bytes {
     @Override public int hashCode() {
         return Arrays.hashCode(bytes);
     }
-
+    @Override public String toString() {
+        return "[" + Arrays.toString(bytes) + ']';
+    }
     public static Bytes random(int n) {
         byte[] b = new byte[n];
         new Random().nextBytes(b);
