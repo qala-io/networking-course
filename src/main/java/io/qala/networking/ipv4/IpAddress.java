@@ -2,16 +2,27 @@ package io.qala.networking.ipv4;
 
 import io.qala.networking.Bytes;
 
-import java.nio.charset.StandardCharsets;
-
 public class IpAddress {
     private final Bytes value;
 
     public IpAddress(String value) {
-        this(value.getBytes(StandardCharsets.UTF_8));//need to rework this funny implementation
+        String[] split = value.split("\\.");
+        if(split.length != 4)
+            throw new IllegalArgumentException("Invalid IPv4 address: " + value);
+        byte[] result = new byte[4];
+        for (int i = 0; i < split.length; i++) {
+            int next = Integer.parseInt(split[i]);
+            if(next > 255 || next < 0)
+                throw new IllegalArgumentException("Invalid IPv4 address: " + value);
+            result[i] = (byte) next;
+        }
+        this.value = new Bytes(result);
     }
     public IpAddress(byte[] value) {
-        this.value = new Bytes(value);
+        this(new Bytes(value));
+    }
+    public IpAddress(Bytes value) {
+        this.value = value;
     }
 
     public byte get(int idx) {
@@ -25,8 +36,17 @@ public class IpAddress {
     @Override public String toString() {
         StringBuilder s = new StringBuilder();
         for (byte b : value.getInternal())
-            s.append(Integer.toString(b)).append(".");
+            s.append(Byte.toUnsignedInt(b)).append(".");
         s.deleteCharAt(s.length() - 1);
         return s.toString();
+    }
+    @Override public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IpAddress ipAddress = (IpAddress) o;
+        return value.equals(ipAddress.value);
+    }
+    @Override public int hashCode() {
+        return value.hashCode();
     }
 }
