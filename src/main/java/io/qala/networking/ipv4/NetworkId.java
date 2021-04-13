@@ -2,14 +2,14 @@ package io.qala.networking.ipv4;
 
 import java.util.Random;
 
-public class NetworkMask {
+public class NetworkId {
     private final IpAddress network;
     private final IpAddress netMask;
 
     /**
      * @param s 192.168.5.0/26
      */
-    public NetworkMask(String s) {
+    public NetworkId(String s) {
         String[] split = s.split("/");
         this.network = new IpAddress(split[0]);
         int zeroBitCount = 32 - Integer.parseInt(split[1]);
@@ -22,7 +22,7 @@ public class NetworkMask {
      * @param network 11000000.00000000.00000010.10000000 (192.0.2.128)
      * @param netMask 11111111.11111111.11111111.10000000	(255.255.255.192)
      */
-    public NetworkMask(IpAddress network, IpAddress netMask) {
+    public NetworkId(IpAddress network, IpAddress netMask) {
         this.network = network;
         this.netMask = netMask;
     }

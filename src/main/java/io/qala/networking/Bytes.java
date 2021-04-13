@@ -67,6 +67,12 @@ public class Bytes {
         new Random().nextBytes(b);
         return new Bytes(b);
     }
+    public boolean startsWith(Bytes beginning) {
+        for (int i = 0; i < beginning.bytes.length; i++)
+            if (beginning.getInternal()[i] != getInternal()[i])
+                return false;
+        return true;
+    }
     public int toInt() {
         if(bytes.length != 4)
             throw new IllegalStateException("Int requires 4 bytes, actual: " + this);

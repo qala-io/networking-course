@@ -7,18 +7,31 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
+
+import static io.qala.datagen.RandomShortApi.alphanumeric;
+import static io.qala.datagen.RandomShortApi.positiveInteger;
 
 /**
  * Either a software bridge or a hardware switch - they do the same thing.
  */
-class Bridge {
+public class Bridge {
     private static final Logger LOGGER = LoggerFactory.getLogger(Bridge.class);
     /**
      * To list NICs who use the bridge: {@code ip link show master <bridge name>}
      */
     private final Map<Port, Nic> ports = new HashMap<>();
     private final Map<Mac, Port> routing = new HashMap<>();
+    private final String name = "br-" + alphanumeric(5);
 
+    public Bridge(Nic ... nics) {
+        LOGGER.info("ip link add name {} type bridge", name);
+        LOGGER.info("ip link set dev {} up", name);
+        for (Nic nic : nics) {
+            LOGGER.info("ip link set dev {} master {}", nic, name);
+            ports.put(new Port(ports.size()), nic);
+        }
+    }
     void receive(Port srcPort, L2Packet packet) {
         routing.put(packet.src(), srcPort);
         Port dstPort = routing.get(packet.dst());
@@ -31,7 +44,7 @@ class Bridge {
     }
     void send(Port port, L2Packet packet) {
         ports.get(port).process(packet);
-        LOGGER.trace("Sending L2 package to: {}", packet.dst());
+        LOGGER.trace("Sending L2 package for {} to port {}", packet.dst(), port);
     }
     public void attachWire(Port port, Nic endpoint) {
         ports.put(port, endpoint);

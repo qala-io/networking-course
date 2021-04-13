@@ -8,6 +8,13 @@ public class ArpPacket {
     private final Mac src, dst;
     private final IpAddress srcIp, dstIp;
     private final Type type;
+    private static final Bytes PACKET_HEADER = new Bytes(
+            0, 1, //hardware type: Ethernet
+            8, 0, // protocol: IPv4
+            6,// hardware size
+            4, //protocol size
+            0
+    );
 
     public ArpPacket(Type type, Mac src, Mac dst, IpAddress srcIp, IpAddress dstIp) {
         this.src = src;
@@ -23,15 +30,14 @@ public class ArpPacket {
     public L2Packet toL2() {
         return new L2Packet(src, dst, toL2Payload());
     }
+
+    public static boolean isArpReq(L2Packet l2Packet) {
+        return l2Packet.getPayload().startsWith(PACKET_HEADER.append(Type.REQUEST.operationCode));
+    }
+
     private Bytes toL2Payload() {
-        Bytes bytes = new Bytes(
-                0, 1, //hardware type: Ethernet
-                8, 0, // protocol: IPv4
-                6,// hardware size
-                4, //protocol size
-                0, type.operationCode
-        );
-        return bytes.append(src.toBytes())
+        return PACKET_HEADER.append(type.operationCode)
+                .append(src.toBytes())
                 .append(srcIp.toBytes())// for some reason we duplicate target MAC in L2 header and here
                 .append(Mac.EMPTY.toBytes())// target MAC will already be present in L2 header
                 .append(dstIp.toBytes());

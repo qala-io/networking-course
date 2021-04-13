@@ -6,5 +6,5 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Router {
-    private final Map<NetworkMask, Nic> table = new HashMap<>();
+    private final Map<NetworkId, Nic> table = new HashMap<>();
 }
