@@ -20,7 +20,7 @@ public class EthNic implements Nic {
      */
     private boolean ipForward;
     private final Kernel kernel;
-    private Link<L2Packet> link;//bridge or another NIC
+    private Router<L2Packet> link;//bridge or another NIC
     private final String name = "eth-" + alphanumeric(5);
 
     public EthNic(Mac mac, IpAddress address, Kernel kernel) {
@@ -32,7 +32,7 @@ public class EthNic implements Nic {
         if(ArpPacket.isArp(l2Packet)) {
             ArpPacket arp = new ArpPacket(l2Packet);
             if(arp.isReq())
-                process(src, arp);
+                process(arp);
             else
                 kernel.putArpEntry(arp.srcIp(), arp.src());
             return;
@@ -45,20 +45,24 @@ public class EthNic implements Nic {
             kernel.route(ipPacket);
     }
     public void sendArp(IpAddress dst) {
-        link.receive(this, ArpPacket.req(mac, address, Mac.BROADCAST, dst).toL2());
+        link.route(this, ArpPacket.req(mac, address, Mac.BROADCAST, dst).toL2());
     }
     @Override public void send(IpAddress dstIp, Mac dstMac, Bytes body) {
-        link.receive(this, new IpPacket(mac, address, dstMac, dstIp, body).toL2());
+        link.route(this, new IpPacket(mac, address, dstMac, dstIp, body).toL2());
     }
-    public void process(Link<L2Packet> src, ArpPacket req) {
-        if(!req.dstIp().equals(address))
-            if(promiscuous)
-                kernel.process(req);
-            else
+    private void process(ArpPacket arp) {
+        if(arp.isReq()) {
+            if(!arp.dstIp().equals(address)) {
+                if (promiscuous)
+                    kernel.process(arp);
                 return;
-        src.receive(this, req.createReply(this.mac).toL2());
+            }
+            link.route(this, arp.createReply(this.mac).toL2());
+        }
+        else
+            kernel.putArpEntry(arp.srcIp(), arp.src());
     }
-    public void setEndpoint(Link<L2Packet> link) {
+    public void setEndpoint(Router<L2Packet> link) {
         LOGGER.info("ip link set dev {} master {}", this, link);
         this.link = link;
     }

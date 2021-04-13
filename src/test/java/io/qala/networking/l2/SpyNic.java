@@ -3,6 +3,7 @@ package io.qala.networking.l2;
 import io.qala.networking.Bytes;
 import io.qala.networking.Link;
 import io.qala.networking.Nic;
+import io.qala.networking.Router;
 import io.qala.networking.ipv4.ArpPacket;
 import io.qala.networking.ipv4.IpAddress;
 
@@ -20,7 +21,7 @@ public class SpyNic implements Nic {
             else
                 receivedReplies.add(packet);
     }
-    @Override public void setEndpoint(Link<L2Packet> link) {
+    @Override public void setEndpoint(Router<L2Packet> link) {
 
     }
     @Override public void sendArp(IpAddress dst) {
