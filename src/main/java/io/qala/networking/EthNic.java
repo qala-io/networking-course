@@ -8,7 +8,7 @@ import io.qala.networking.l2.Mac;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.qala.datagen.RandomShortApi.alphanumeric;
+import static io.qala.datagen.RandomShortApi.numeric;
 
 public class EthNic implements Nic {
     private static final Logger LOGGER = LoggerFactory.getLogger(EthNic.class);
@@ -21,7 +21,7 @@ public class EthNic implements Nic {
     private boolean ipForward;
     private final Kernel kernel;
     private Router<L2Packet> link;//bridge or another NIC
-    private final String name = "eth-" + alphanumeric(5);
+    private final String name = "eth" + numeric(5);
 
     public EthNic(Mac mac, IpAddress address, Kernel kernel) {
         this.mac = mac;
@@ -50,7 +50,7 @@ public class EthNic implements Nic {
         link.route(this, ArpPacket.req(mac, address, Mac.BROADCAST, dst).toL2());
     }
     @Override public void send(IpAddress dstIp, Mac dstMac, Bytes body) {
-        LOGGER.info("Sending IP Packet to {} {}", dstMac, dstIp);
+        LOGGER.info("Sending IP packet to {}", dstIp);
         link.route(this, new IpPacket(mac, address, dstMac, dstIp, body).toL2());
     }
     private void process(ArpPacket arp) {
@@ -66,7 +66,7 @@ public class EthNic implements Nic {
             kernel.putArpEntry(arp.srcIp(), arp.src());
     }
     public void setEndpoint(Router<L2Packet> link) {
-        LOGGER.info("ip link set dev {} master {}", this, link);
+        Loggers.TERMINAL_COMMANDS.info("ip link set dev {} master {}", this, link);
         this.link = link;
     }
     @Override public String toString() {

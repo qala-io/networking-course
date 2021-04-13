@@ -1,9 +1,6 @@
 package io.qala.networking.l2;
 
-import io.qala.networking.Link;
-import io.qala.networking.Nic;
-import io.qala.networking.Port;
-import io.qala.networking.Router;
+import io.qala.networking.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static io.qala.datagen.RandomShortApi.alphanumeric;
+import static io.qala.datagen.RandomShortApi.numeric;
 
 /**
  * Either a software bridge or a hardware switch - they do the same thing.
@@ -24,11 +22,11 @@ public class Bridge implements Link<L2Packet>, Router<L2Packet> {
     private final Map<Port, Nic> nics = new HashMap<>();
     private final Map<Link<L2Packet>, Port> ports = new HashMap<>();
     private final Map<Mac, Port> routing = new HashMap<>();
-    private final String name = "br-" + alphanumeric(5);
+    private final String name = "br" + numeric(5);
 
     public Bridge(Nic ... nics) {
-        LOGGER.info("ip link add name {} type bridge", name);
-        LOGGER.info("ip link set dev {} up", name);
+        Loggers.TERMINAL_COMMANDS.info("ip link add name {} type bridge", name);
+        Loggers.TERMINAL_COMMANDS.info("ip link set dev {} up", name);
         for (Nic nic : nics) {
             Port port = new Port(this.nics.size());
             this.nics.put(port, nic);
@@ -64,7 +62,7 @@ public class Bridge implements Link<L2Packet>, Router<L2Packet> {
         ports.put(endpoint, port);
     }
     private void send(Port port, L2Packet packet) {
-        LOGGER.trace("Sending L2 package for {} to port {}", packet.dst(), port);
+        LOGGER.trace("Sending L2 packet for {} to port {}", packet.dst(), port);
         nics.get(port).receive(this, packet);
     }
     @Override public String toString() {

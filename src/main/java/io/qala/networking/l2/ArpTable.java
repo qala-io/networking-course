@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ArpTable {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ArpTable.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArpTable.class.getSimpleName());
     private final Map<IpAddress, Mac> dynamicIps = new HashMap<>();
 
     public void put(IpAddress ip, Mac mac) {

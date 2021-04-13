@@ -2,17 +2,12 @@ package io.qala.networking;
 
 import io.qala.networking.ipv4.*;
 import io.qala.networking.l2.ArpTable;
-import io.qala.networking.l2.Bridge;
 import io.qala.networking.l2.Mac;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Kernel {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Bridge.class);
-    private final List<Nic> nics = new ArrayList<>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(Kernel.class);
     private final RoutingTable routes = new RoutingTable();
     private final ArpTable arpTable = new ArpTable();
 
@@ -48,7 +43,7 @@ public class Kernel {
     }
 
     public void addRoute(NetworkId networkId, Nic nic) {
-        LOGGER.info("ip route add to local {} dev {}", networkId, nic);
+        Loggers.TERMINAL_COMMANDS.info("ip route add to local {} dev {}", networkId, nic);
         routes.put(networkId, nic);
     }
     ArpTable getArpTable() {
