@@ -34,7 +34,7 @@ public class EthNic implements Nic {
             if(arp.isReq())
                 process(src, arp);
             else
-                LOGGER.trace("Received IP of the dst: {}", arp.dstIp());
+                kernel.putArpEntry(arp.srcIp(), arp.src());
             return;
         }
         IpPacket ipPacket = new IpPacket(l2Packet);

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RealisticNetworkTest {
-    @Test public void lan() {
+    @Test public void physicalLan() {
         NetworkId network = new NetworkId("10.0.0.0/16");
         List<IpAddress> hosts = hosts(network, 3);
         EthNic nic1 = new EthNic(Mac.random(), hosts.get(0), new Kernel());

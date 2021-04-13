@@ -13,6 +13,7 @@ import static io.qala.datagen.RandomShortApi.alphanumeric;
 
 /**
  * Either a software bridge or a hardware switch - they do the same thing.
+ * Watch <a href="https://www.youtube.com/watch?v=rYodcvhh7b8">this video</a>.
  */
 public class Bridge implements Endpoint<L2Packet> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Bridge.class);
@@ -38,12 +39,15 @@ public class Bridge implements Endpoint<L2Packet> {
         Port srcPort = ports.get(src);
         routing.put(packet.src(), srcPort);
         Port dstPort = routing.get(packet.dst());
-        if(dstPort != null)
+        if(dstPort != null) {
             send(dstPort, packet);
-        else // broadcast won't be in the table either, so no need to do an explicit check - it'll get here anyway
-            for (Port next : nics.keySet())
-                if(!next.equals(srcPort))
-                    send(next, packet);
+            return;
+        }
+        // if no such entry in existing ARP table, start "flooding"
+        // broadcast won't be in the table either, so no need to do an explicit check - it'll get here anyway
+        for (Port next : nics.keySet())
+            if (!next.equals(srcPort))
+                send(next, packet);
     }
     public void attachWire(Port port, Nic endpoint) {
         nics.put(port, endpoint);
