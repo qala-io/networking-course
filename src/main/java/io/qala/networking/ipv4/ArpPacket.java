@@ -33,7 +33,7 @@ public class ArpPacket {
         this.srcIp = new IpAddress(l2Packet.getPayload().get(offset, offset+=IPV4_BYTES));
         this.dstIp = new IpAddress(l2Packet.getPayload().get(offset+=MAC_BYTES, offset+IPV4_BYTES));
     }
-    public static ArpPacket req(Mac src, Mac dst, IpAddress srcIp, IpAddress dstIp) {
+    public static ArpPacket req(Mac src, IpAddress srcIp, Mac dst, IpAddress dstIp) {
         return new ArpPacket(Type.REQUEST, src, dst, srcIp, dstIp);
     }
     public Mac src() {

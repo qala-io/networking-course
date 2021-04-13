@@ -2,6 +2,8 @@ package io.qala.networking.ipv4;
 
 import io.qala.networking.Bytes;
 
+import static io.qala.datagen.RandomShortApi.integer;
+
 public class IpAddress {
     private final int value;
 
@@ -55,5 +57,9 @@ public class IpAddress {
     }
     @Override public int hashCode() {
         return value;
+    }
+
+    public static IpAddress random() {
+        return new IpAddress(integer());
     }
 }

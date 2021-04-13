@@ -45,7 +45,7 @@ public class EthNic implements Nic {
             kernel.route(ipPacket);
     }
     public void sendArp(IpAddress dst) {
-        link.receive(this, ArpPacket.req(mac, Mac.BROADCAST, address, dst).toL2());
+        link.receive(this, ArpPacket.req(mac, address, Mac.BROADCAST, dst).toL2());
     }
     @Override public void send(IpAddress dstIp, Mac dstMac, Bytes body) {
         link.receive(this, new IpPacket(mac, address, dstMac, dstIp, body).toL2());
