@@ -37,6 +37,8 @@ public class EthNic implements Nic {
                 kernel.putArpEntry(arp.srcIp(), arp.src());
             return;
         }
+        if(!IpPacket.isIp(l2Packet))
+            throw new IllegalArgumentException("Unknown protocol");
         IpPacket ipPacket = new IpPacket(l2Packet);
         boolean targetedThisNic = ipPacket.dst().equals(this.address);
         if(IpPacket.isIp(l2Packet))

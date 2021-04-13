@@ -64,8 +64,8 @@ public class Bridge implements Link<L2Packet>, Router<L2Packet> {
         ports.put(endpoint, port);
     }
     private void send(Port port, L2Packet packet) {
-        nics.get(port).receive(this, packet);
         LOGGER.trace("Sending L2 package for {} to port {}", packet.dst(), port);
+        nics.get(port).receive(this, packet);
     }
     @Override public String toString() {
         return name;

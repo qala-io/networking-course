@@ -9,6 +9,9 @@ public class RoutingTable {
     private final IpAddress defaultGateway = new IpAddress(0);
     private final Map<NetworkId, Nic> table = new HashMap<>();
 
+    public void put(NetworkId network, Nic nic) {
+        table.put(network, nic);
+    }
     public Nic getNic(IpAddress ip) {
         for (Map.Entry<NetworkId, Nic> entry : table.entrySet())
             if (entry.getKey().matches(ip))
