@@ -23,6 +23,15 @@ public class ArpPacket {
         this.dstIp = dstIp;
         this.type = type;
     }
+    public ArpPacket(L2Packet l2Packet) {
+        this.src = l2Packet.src();
+        this.dst = l2Packet.dst();
+        int offset = PACKET_HEADER.size();
+        this.type = Type.parseCode(l2Packet.getPayload().get(offset++));
+        offset+=6;// src MAC
+        this.srcIp = new IpAddress(l2Packet.getPayload().get(offset, offset+=4));
+        this.dstIp = new IpAddress(l2Packet.getPayload().get(offset+=6, offset+4));
+    }
     public static ArpPacket req(Mac src, Mac dst, IpAddress srcIp, IpAddress dstIp) {
         return new ArpPacket(Type.REQUEST, src, dst, srcIp, dstIp);
     }
@@ -43,12 +52,18 @@ public class ArpPacket {
                 .append(dstIp.toBytes());
     }
 
-    private enum Type {
+    public enum Type {
         REQUEST(1), REPLY(2);
         private final byte operationCode;
 
         Type(int operationCode) {
             this.operationCode = (byte) operationCode;
+        }
+        static Type parseCode(byte code) {
+            for (Type next : values())
+                if (next.operationCode == code)
+                    return next;
+            throw new IllegalArgumentException("" + code);
         }
     }
 }

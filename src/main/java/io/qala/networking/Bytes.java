@@ -27,6 +27,14 @@ public class Bytes {
         System.arraycopy(toAppend, 0, newBytes, this.bytes.length, toAppend.length);
         return new Bytes(newBytes);
     }
+    public Bytes get(int from, int toExclusive) {
+        byte[] result = new byte[toExclusive - from];
+        System.arraycopy(bytes, from, result, 0, result.length);
+        return new Bytes(result);
+    }
+    public byte get(int idx) {
+        return bytes[idx];
+    }
     public byte[] getInternal() {
         return bytes;
     }

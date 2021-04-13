@@ -32,7 +32,7 @@ public class Bridge {
             ports.put(new Port(ports.size()), nic);
         }
     }
-    void receive(Port srcPort, L2Packet packet) {
+    public void receive(Port srcPort, L2Packet packet) {
         routing.put(packet.src(), srcPort);
         Port dstPort = routing.get(packet.dst());
         if(dstPort != null)
@@ -42,11 +42,14 @@ public class Bridge {
                 if(!next.equals(srcPort))
                     send(next, packet);
     }
-    void send(Port port, L2Packet packet) {
+    public void attachWire(Port port, Nic endpoint) {
+        ports.put(port, endpoint);
+    }
+    private void send(Port port, L2Packet packet) {
         ports.get(port).process(packet);
         LOGGER.trace("Sending L2 package for {} to port {}", packet.dst(), port);
     }
-    public void attachWire(Port port, Nic endpoint) {
-        ports.put(port, endpoint);
+    @Override public String toString() {
+        return name;
     }
 }

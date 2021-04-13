@@ -23,7 +23,7 @@ public class BridgeTest {
         bridge.attachWire(new Port(1), port1Endpoint);
         bridge.attachWire(new Port(2), port2Endpoint);
 
-        bridge.receive(port0, ArpPacket.req(src, Mac.random(), network.randomAddress(), network.randomAddress()).toL2());
+        bridge.receive(port0, ArpPacket.req(src, Mac.random(), network.randomAddr(), network.randomAddr()).toL2());
         assertEquals(0, port0Endpoint.size());
         assertEquals(1, port1Endpoint.size());
         assertEquals(1, port2Endpoint.size());

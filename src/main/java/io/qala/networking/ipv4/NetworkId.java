@@ -2,6 +2,8 @@ package io.qala.networking.ipv4;
 
 import java.util.Random;
 
+import static io.qala.datagen.RandomShortApi.integer;
+
 public class NetworkId {
     private final IpAddress network;
     private final IpAddress netMask;
@@ -30,9 +32,24 @@ public class NetworkId {
         return (netMask.asInt() & address.asInt()) == network.asInt();
     }
 
-    public IpAddress randomAddress() {
+    public static NetworkId random() {
+        int maskSize = integer(7, 25);
+        int mask = -(1 << maskSize);
+        int ip = integer();
+        return new NetworkId(new IpAddress(ip & mask), new IpAddress(mask));
+    }
+    public IpAddress randomAddr() {
         int i = new Random().nextInt();
         return new IpAddress(network.asInt() | (i & ~netMask.asInt()));
     }
 
+    @Override public String toString() {
+        int mask = netMask.asInt();
+        int ones = 0;
+        while(mask != 0) {
+            mask <<= 1;
+            ones++;
+        }
+        return network + "/" + ones;
+    }
 }

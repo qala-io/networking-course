@@ -24,7 +24,11 @@ public class NetworkIdTest {
     }
     @Test public void randomAlwaysGeneratesIpWithinTheNetwork() {
         NetworkId typeC = new NetworkId("168.0.12.0/24");
-        IpAddress address = typeC.randomAddress();
+        IpAddress address = typeC.randomAddr();
         assertTrue("actual: " + address, typeC.matches(address));
+    }
+    @Test public void canParseNetworkAndThenGenerateSameAsString() {
+        String net = "168.0.12.0/23";
+        assertEquals(net, new NetworkId(net).toString());
     }
 }
