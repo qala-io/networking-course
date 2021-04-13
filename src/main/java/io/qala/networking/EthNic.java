@@ -3,7 +3,6 @@ package io.qala.networking;
 import io.qala.networking.ipv4.ArpPacket;
 import io.qala.networking.ipv4.IpAddress;
 import io.qala.networking.ipv4.IpPacket;
-import io.qala.networking.l2.Bridge;
 import io.qala.networking.l2.L2Packet;
 import io.qala.networking.l2.Mac;
 import org.slf4j.Logger;
@@ -30,24 +29,31 @@ public class EthNic implements Nic {
         this.kernel = kernel;
     }
     @Override public void process(Endpoint<L2Packet> src, L2Packet l2Packet) {
+        if(ArpPacket.isArpReq(l2Packet)) {
+            process(src, new ArpPacket(l2Packet));
+            return;
+        }
+        if(ArpPacket.isArpReply(l2Packet)) {
+            LOGGER.trace("Received IP of the dst: {}", new ArpPacket(l2Packet).dstIp());
+            return;
+        }
         IpPacket ipPacket = new IpPacket(l2Packet);
         boolean targetedThisNic = ipPacket.dst().equals(this.address);
-        if(ArpPacket.isArpReq(l2Packet))
-            process(new ArpPacket(l2Packet));
-        else if(targetedThisNic)
+        if(IpPacket.isIp(l2Packet))
             kernel.process(ipPacket);
         else if(ipForward)
             kernel.route(ipPacket);
     }
     public void send(IpPacket ipPacket) {
     }
-    public void process(ArpPacket req) {
+
+    public void process(Endpoint<L2Packet> src, ArpPacket req) {
         if(!req.dstIp().equals(address))
             if(promiscuous)
                 kernel.process(req);
             else
                 return;
-
+        src.process(this, req.createReply(this.mac).toL2());
     }
     public void setEndpoint(Endpoint<L2Packet> endpoint) {
         LOGGER.info("ip link set dev {} master {}", this, endpoint);

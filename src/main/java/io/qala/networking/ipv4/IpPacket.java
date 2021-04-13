@@ -8,6 +8,9 @@ public class IpPacket {
     public IpPacket(L2Packet l2Packet) {
         this.l2Packet = l2Packet;
     }
+    public static boolean isIp(L2Packet l2Packet) {
+        return false;
+    }
     public IpAddress dst() {
         return null;
     }

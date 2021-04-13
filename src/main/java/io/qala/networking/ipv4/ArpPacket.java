@@ -55,6 +55,9 @@ public class ArpPacket {
     public static boolean isArpReq(L2Packet l2Packet) {
         return l2Packet.getPayload().startsWith(PACKET_HEADER.append(Type.REQUEST.operationCode));
     }
+    public static boolean isArpReply(L2Packet l2Packet) {
+        return l2Packet.getPayload().startsWith(PACKET_HEADER.append(Type.REPLY.operationCode));
+    }
 
     private Bytes toL2Payload() {
         return PACKET_HEADER.append(type.operationCode)
@@ -62,6 +65,11 @@ public class ArpPacket {
                 .append(srcIp.toBytes())// interestingly we duplicate src MAC in L2 header too
                 .append(Mac.EMPTY.toBytes())// target MAC will already be present in L2 header
                 .append(dstIp.toBytes());
+    }
+    public ArpPacket createReply(Mac src) {
+        if(!isArpReq(toL2()))
+            throw new IllegalStateException("This wasn't a request in the first place");
+        return new ArpPacket(Type.REPLY, src, this.src, this.dstIp, this.srcIp);
     }
 
     public enum Type {
