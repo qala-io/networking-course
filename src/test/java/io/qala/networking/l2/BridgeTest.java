@@ -17,13 +17,13 @@ public class BridgeTest {
 
         Port port0 = new Port(0);
         SpyNic port0Endpoint = new SpyNic(),
-                    port1Endpoint = new SpyNic(),
-                    port2Endpoint = new SpyNic();
+               port1Endpoint = new SpyNic(),
+               port2Endpoint = new SpyNic();
         bridge.attachWire(port0, port0Endpoint);
         bridge.attachWire(new Port(1), port1Endpoint);
         bridge.attachWire(new Port(2), port2Endpoint);
 
-        bridge.receive(port0, ArpPacket.req(src, Mac.random(), network.randomAddr(), network.randomAddr()).toL2());
+        bridge.process(port0Endpoint, ArpPacket.req(src, Mac.random(), network.randomAddr(), network.randomAddr()).toL2());
         assertEquals(0, port0Endpoint.size());
         assertEquals(1, port1Endpoint.size());
         assertEquals(1, port2Endpoint.size());

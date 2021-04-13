@@ -5,14 +5,15 @@ import io.qala.networking.l2.L2Packet;
 import io.qala.networking.l2.Mac;
 
 public class ArpPacket {
+    private static final int MAC_BYTES = 6, IPV4_BYTES = 4;
     private final Mac src, dst;
     private final IpAddress srcIp, dstIp;
     private final Type type;
     private static final Bytes PACKET_HEADER = new Bytes(
             0, 1, //hardware type: Ethernet
             8, 0, // protocol: IPv4
-            6,// hardware size
-            4, //protocol size
+            MAC_BYTES,// hardware size aka local protocol address length
+            IPV4_BYTES,//protocol size aka global protocol address length
             0
     );
 
@@ -28,14 +29,25 @@ public class ArpPacket {
         this.dst = l2Packet.dst();
         int offset = PACKET_HEADER.size();
         this.type = Type.parseCode(l2Packet.getPayload().get(offset++));
-        offset+=6;// src MAC
-        this.srcIp = new IpAddress(l2Packet.getPayload().get(offset, offset+=4));
-        this.dstIp = new IpAddress(l2Packet.getPayload().get(offset+=6, offset+4));
+        offset+=MAC_BYTES;// src MAC
+        this.srcIp = new IpAddress(l2Packet.getPayload().get(offset, offset+=IPV4_BYTES));
+        this.dstIp = new IpAddress(l2Packet.getPayload().get(offset+=MAC_BYTES, offset+IPV4_BYTES));
     }
     public static ArpPacket req(Mac src, Mac dst, IpAddress srcIp, IpAddress dstIp) {
         return new ArpPacket(Type.REQUEST, src, dst, srcIp, dstIp);
     }
-
+    public Mac src() {
+        return src;
+    }
+    public Mac dst() {
+        return dst;
+    }
+    public IpAddress dstIp() {
+        return dstIp;
+    }
+    public IpAddress srcIp() {
+        return srcIp;
+    }
     public L2Packet toL2() {
         return new L2Packet(src, dst, toL2Payload());
     }
@@ -47,7 +59,7 @@ public class ArpPacket {
     private Bytes toL2Payload() {
         return PACKET_HEADER.append(type.operationCode)
                 .append(src.toBytes())
-                .append(srcIp.toBytes())// for some reason we duplicate target MAC in L2 header and here
+                .append(srcIp.toBytes())// interestingly we duplicate src MAC in L2 header too
                 .append(Mac.EMPTY.toBytes())// target MAC will already be present in L2 header
                 .append(dstIp.toBytes());
     }

@@ -7,11 +7,16 @@ public class Bytes {
     public static final byte FF = (byte) 0xff;
     private final byte[] bytes;
 
-    /** Each int has to be smaller or equal to a byte. */
+    /**
+     * @param bytes unsigned bytes within an integer. Each must be between 0 and 255.
+     */
     public Bytes(int ... bytes) {
         this.bytes = new byte[bytes.length];
         for (int i = 0; i < bytes.length; i++) {
-            this.bytes[i] = (byte) bytes[i];
+            int integer = bytes[i];
+            if(integer > 255 || integer < 0)
+                throw new IllegalArgumentException("Not an unsigned byte: " + integer);
+            this.bytes[i] = (byte) integer;
         }
     }
     public Bytes(byte[] bytes) {

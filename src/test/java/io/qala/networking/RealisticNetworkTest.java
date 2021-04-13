@@ -14,12 +14,13 @@ public class RealisticNetworkTest {
     @Test public void lan() {
         NetworkId network = new NetworkId("10.0.0.0/16");
         List<IpAddress> hosts = hosts(network, 3);
+        EthNic nic1 = new EthNic(Mac.random(), hosts.get(0), new Kernel());
         Bridge bridge = new Bridge(
-                new EthNic(Mac.random(), hosts.get(0), new Kernel()),
+                nic1,
                 new EthNic(Mac.random(), hosts.get(1), new Kernel()),
                 new EthNic(Mac.random(), hosts.get(2), new Kernel())
         );
-        bridge.receive(new Port(0), ArpPacket.req(Mac.random(), Mac.random(), hosts.get(0), hosts.get(1)).toL2());
+        bridge.process(nic1, ArpPacket.req(Mac.random(), Mac.random(), hosts.get(0), hosts.get(1)).toL2());
     }
     private static List<IpAddress> hosts(NetworkId network, int nOfHosts) {
         List<IpAddress> result = new ArrayList<>(nOfHosts);
