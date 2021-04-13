@@ -28,9 +28,7 @@ public class Kernel {
             routes.getDefaultGateway();
             // send to the router
         }
-        Mac dstMac = arpTable.get(dstIp);
-        if(dstMac == null)// in real life this is async and OS has to wait until ARP table is updated
-            nic.sendArp(dstIp);
+        Mac dstMac = arpTable.getOrCompute(dstIp, () -> nic.sendArp(dstIp));
         nic.send(dstIp, dstMac, payload);
     }
     public void route(IpPacket ipPacket) {

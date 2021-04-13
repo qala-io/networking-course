@@ -15,6 +15,17 @@ public class ArpTable {
         LOGGER.trace("Updating ARP table with [{} -> {}]", ip, mac);
         dynamicIps.put(ip, mac);
     }
+    public Mac getOrCompute(IpAddress ip, Runnable sendingArp) {
+        Mac mac = get(ip);
+        if(mac == null) {
+            // in real life this is async and OS has to wait until ARP table is updated
+            sendingArp.run();
+            mac = get(ip);
+        }
+        if(mac == null)
+            throw new RuntimeException("Couldn't get MAC address for IP " + ip);
+        return mac;
+    }
     public Mac get(IpAddress ip) {
         return dynamicIps.get(ip);
     }

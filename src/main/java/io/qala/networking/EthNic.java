@@ -50,6 +50,7 @@ public class EthNic implements Nic {
         link.route(this, ArpPacket.req(mac, address, Mac.BROADCAST, dst).toL2());
     }
     @Override public void send(IpAddress dstIp, Mac dstMac, Bytes body) {
+        LOGGER.info("Sending IP Packet to {} {}", dstMac, dstIp);
         link.route(this, new IpPacket(mac, address, dstMac, dstIp, body).toL2());
     }
     private void process(ArpPacket arp) {

@@ -1,7 +1,6 @@
 package io.qala.networking;
 
 import io.qala.networking.ipv4.IpAddress;
-import io.qala.networking.ipv4.IpPacket;
 import io.qala.networking.ipv4.NetworkId;
 import io.qala.networking.l2.Bridge;
 import io.qala.networking.l2.Mac;
