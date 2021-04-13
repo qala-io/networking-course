@@ -29,12 +29,12 @@ public class EthNic implements Nic {
         this.kernel = kernel;
     }
     @Override public void process(Endpoint<L2Packet> src, L2Packet l2Packet) {
-        if(ArpPacket.isArpReq(l2Packet)) {
-            process(src, new ArpPacket(l2Packet));
-            return;
-        }
-        if(ArpPacket.isArpReply(l2Packet)) {
-            LOGGER.trace("Received IP of the dst: {}", new ArpPacket(l2Packet).dstIp());
+        if(ArpPacket.isArp(l2Packet)) {
+            ArpPacket arp = new ArpPacket(l2Packet);
+            if(arp.isReq())
+                process(src, arp);
+            else
+                LOGGER.trace("Received IP of the dst: {}", arp.dstIp());
             return;
         }
         IpPacket ipPacket = new IpPacket(l2Packet);

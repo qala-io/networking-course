@@ -52,11 +52,11 @@ public class ArpPacket {
         return new L2Packet(src, dst, toL2Payload());
     }
 
-    public static boolean isArpReq(L2Packet l2Packet) {
-        return l2Packet.getPayload().startsWith(PACKET_HEADER.append(Type.REQUEST.operationCode));
+    public static boolean isArp(L2Packet l2Packet) {
+        return l2Packet.getPayload().startsWith(PACKET_HEADER);
     }
-    public static boolean isArpReply(L2Packet l2Packet) {
-        return l2Packet.getPayload().startsWith(PACKET_HEADER.append(Type.REPLY.operationCode));
+    public boolean isReq() {
+        return type == Type.REQUEST;
     }
 
     private Bytes toL2Payload() {
@@ -67,7 +67,7 @@ public class ArpPacket {
                 .append(dstIp.toBytes());
     }
     public ArpPacket createReply(Mac src) {
-        if(!isArpReq(toL2()))
+        if(!isReq())
             throw new IllegalStateException("This wasn't a request in the first place");
         return new ArpPacket(Type.REPLY, src, this.src, this.dstIp, this.srcIp);
     }
