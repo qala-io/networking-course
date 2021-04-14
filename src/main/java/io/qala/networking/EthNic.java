@@ -44,9 +44,10 @@ public class EthNic implements Nic {
             throw new IllegalArgumentException("Unknown protocol");
         IpPacket ipPacket = new IpPacket(l2Packet);
         boolean targetedThisNic = ipPacket.dst().equals(this.address);
-        if(IpPacket.isIp(l2Packet))
+        if(mac.equals(ipPacket.dstMac())) {
+            LOGGER.info(this + " received IP packet from " + ipPacket.src());
             kernel.process(this, ipPacket);
-        else if(ipForward)
+        } else if(ipForward)
             kernel.route(ipPacket);
     }
     public void sendArp(IpAddress ip) {
@@ -82,5 +83,8 @@ public class EthNic implements Nic {
     }
     Mac getMac() {
         return mac;
+    }
+    public IpAddress getIp() {
+        return address;
     }
 }

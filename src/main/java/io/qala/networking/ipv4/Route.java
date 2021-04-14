@@ -21,4 +21,11 @@ public class Route {
     public IpAddress getGateway() {
         return gateway;
     }
+    public IpAddress getNextHopFor(IpAddress ip) {
+        if(!destination.matches(ip))
+            throw new IllegalArgumentException(ip + " doesn't match destination " + destination);
+        if(isLocal())
+            return ip;
+        return gateway;
+    }
 }

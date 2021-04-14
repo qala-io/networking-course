@@ -42,6 +42,12 @@ public class IpPacket {
     public IpAddress src() {
         return srcIp;
     }
+    public Mac dstMac() {
+        return dstMac;
+    }
+    public Mac srcMac() {
+        return srcMac;
+    }
     public Bytes getPayload() {
         return payload;
     }

@@ -16,18 +16,16 @@ public class Kernel {
 
     }
     public void process(Nic nic, IpPacket ipPacket) {
-        trafficStats.receivedPacket(nic);
+        trafficStats.receivedPacket(nic, ipPacket);
     }
     public void send(IpAddress dstIp, Bytes payload) {
         Route route = routes.getRoute(dstIp);
         Nic nic = route.getNic();
-        if(route.isLocal()) {
-            Mac dstMac = arpTable.getOrCompute(dstIp, () -> nic.sendArp(dstIp));
-            nic.send(dstIp, dstMac, payload);
-            trafficStats.sentPacket(nic);
-        } else {
-            //route
-        }
+        // if it's a local route - same IP is returned, otherwise the gateway is returned
+        IpAddress nextHopIp = route.getNextHopFor(dstIp);
+        Mac dstMac = arpTable.getOrCompute(nextHopIp, () -> nic.sendArp(nextHopIp));
+        nic.send(dstIp, dstMac, payload);
+        trafficStats.sentPacket(nic);
     }
     public void route(IpPacket ipPacket) {
 
