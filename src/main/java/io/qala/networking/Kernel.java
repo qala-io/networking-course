@@ -6,16 +6,19 @@ import io.qala.networking.l2.Mac;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 public class Kernel {
     private static final Logger LOGGER = LoggerFactory.getLogger(Kernel.class);
     private final RoutingTable routes = new RoutingTable();
     private final ArpTable arpTable = new ArpTable();
+    private final TrafficStats trafficStats = new TrafficStats();
 
     public void process(ArpPacket packet) {
 
     }
-    public void process(IpPacket ipPacket) {
-
+    public void process(Nic nic, IpPacket ipPacket) {
+        trafficStats.receivedPacket(nic);
     }
     public void send(IpAddress dstIp, Bytes payload) {
         Nic nic = routes.getNic(dstIp);
@@ -25,6 +28,7 @@ public class Kernel {
         }
         Mac dstMac = arpTable.getOrCompute(dstIp, () -> nic.sendArp(dstIp));
         nic.send(dstIp, dstMac, payload);
+        trafficStats.sentPacket(nic);
     }
     public void route(IpPacket ipPacket) {
         IpAddress dstIp = ipPacket.dst();
@@ -48,5 +52,8 @@ public class Kernel {
     }
     ArpTable getArpTable() {
         return arpTable;
+    }
+    TrafficStats getTrafficStats() {
+        return trafficStats;
     }
 }

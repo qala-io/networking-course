@@ -42,7 +42,7 @@ public class EthNic implements Nic {
         IpPacket ipPacket = new IpPacket(l2Packet);
         boolean targetedThisNic = ipPacket.dst().equals(this.address);
         if(IpPacket.isIp(l2Packet))
-            kernel.process(ipPacket);
+            kernel.process(this, ipPacket);
         else if(ipForward)
             kernel.route(ipPacket);
     }
