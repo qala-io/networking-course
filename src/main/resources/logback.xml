@@ -3,7 +3,7 @@
     <encoder><pattern>$ %msg%n</pattern></encoder>
   </appender>
   <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder><pattern>%5level %.10logger{10} - %msg%n</pattern></encoder>
+    <encoder><pattern>%5level %.10logger{10} - %X{padding}%msg%n</pattern></encoder>
   </appender>
   <logger name="$" level="INFO">
     <appender-ref ref="$"/>

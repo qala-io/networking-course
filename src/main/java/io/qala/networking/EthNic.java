@@ -46,12 +46,17 @@ public class EthNic implements Nic {
         else if(ipForward)
             kernel.route(ipPacket);
     }
-    public void sendArp(IpAddress dst) {
-        link.route(this, ArpPacket.req(mac, address, Mac.BROADCAST, dst).toL2());
+    public void sendArp(IpAddress ip) {
+        LOGGER.info("Sending ARP for {}", ip);
+        LogPadding.pad();
+        link.route(this, ArpPacket.req(mac, address, Mac.BROADCAST, ip).toL2());
+        LogPadding.unpad();
     }
     @Override public void send(IpAddress dstIp, Mac dstMac, Bytes body) {
         LOGGER.info("Sending IP packet to {}", dstIp);
+        LogPadding.pad();
         link.route(this, new IpPacket(mac, address, dstMac, dstIp, body).toL2());
+        LogPadding.unpad();
     }
     private void process(ArpPacket arp) {
         if(arp.isReq()) {
