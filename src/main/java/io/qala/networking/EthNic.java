@@ -23,6 +23,9 @@ public class EthNic implements Nic {
     private Router<L2Packet> link;//bridge or another NIC
     private final String name = "eth" + numeric(5);
 
+    public EthNic(IpAddress address, Kernel kernel) {
+        this(Mac.random(), address, kernel);
+    }
     public EthNic(Mac mac, IpAddress address, Kernel kernel) {
         this.mac = mac;
         this.address = address;

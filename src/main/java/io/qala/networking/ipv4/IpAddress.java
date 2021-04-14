@@ -5,6 +5,7 @@ import io.qala.networking.Bytes;
 import static io.qala.datagen.RandomShortApi.integer;
 
 public class IpAddress {
+    public static final IpAddress MIN = new IpAddress(0), MAX = new IpAddress(Integer.MIN_VALUE);
     private final int value;
 
     public IpAddress(String value) {
