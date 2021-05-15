@@ -4,6 +4,8 @@ import io.qala.networking.Bytes;
 import io.qala.networking.l2.L2Packet;
 import io.qala.networking.l2.Mac;
 
+import java.util.Objects;
+
 public class ArpPacket {
     private static final int MAC_BYTES = 6, IPV4_BYTES = 4;
     private final Mac src, dst;
@@ -18,28 +20,28 @@ public class ArpPacket {
     );
 
     public ArpPacket(Type type, Mac src, Mac dst, IpAddress srcIp, IpAddress dstIp) {
-        this.src = src;
-        this.dst = dst;
-        this.srcIp = srcIp;
-        this.dstIp = dstIp;
-        this.type = type;
+        this.src = Objects.requireNonNull(src);
+        this.dst = Objects.requireNonNull(dst);
+        this.srcIp = Objects.requireNonNull(srcIp);
+        this.dstIp = Objects.requireNonNull(dstIp);
+        this.type = Objects.requireNonNull(type);
     }
     public ArpPacket(L2Packet l2Packet) {
         this.src = l2Packet.src();
         this.dst = l2Packet.dst();
         int offset = PACKET_HEADER.size();
         this.type = Type.parseCode(l2Packet.getPayload().get(offset++));
-        offset+=MAC_BYTES;// src MAC
+        offset += MAC_BYTES;// src MAC
         this.srcIp = new IpAddress(l2Packet.getPayload().get(offset, offset+=IPV4_BYTES));
         this.dstIp = new IpAddress(l2Packet.getPayload().get(offset+=MAC_BYTES, offset+IPV4_BYTES));
     }
     public static ArpPacket req(Mac src, IpAddress srcIp, Mac dst, IpAddress dstIp) {
         return new ArpPacket(Type.REQUEST, src, dst, srcIp, dstIp);
     }
-    public Mac src() {
+    public Mac srcMac() {
         return src;
     }
-    public Mac dst() {
+    public Mac dstMac() {
         return dst;
     }
     public IpAddress dstIp() {
@@ -54,6 +56,9 @@ public class ArpPacket {
 
     public static boolean isArp(L2Packet l2Packet) {
         return l2Packet.getPayload().startsWith(PACKET_HEADER);
+    }
+    public boolean isReply() {
+        return type == Type.REPLY;
     }
     public boolean isReq() {
         return type == Type.REQUEST;

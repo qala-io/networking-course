@@ -24,10 +24,10 @@ public class SpyNic implements Nic {
     @Override public void setEndpoint(Router<L2Packet> link) {
 
     }
-    @Override public void sendArp(IpAddress dst) {
+    @Override public void sendArp(IpAddress srcIp, IpAddress dst) {
 
     }
-    @Override public void send(IpAddress dstIp, Mac dstMac, Bytes body) {
+    @Override public void send(IpAddress srcIp, IpAddress dstIp, Mac dstMac, Bytes body) {
 
     }
     public int receivedArpRequests() {

@@ -42,14 +42,17 @@ public class NetworkId {
         int i = new Random().nextInt();
         return new IpAddress(network.asInt() | (i & ~netMask.asInt()));
     }
-
-    @Override public String toString() {
+    public int getNetworkBitCount() {
         int mask = netMask.asInt();
         int ones = 0;
         while(mask != 0) {
             mask <<= 1;
             ones++;
         }
-        return network + "/" + ones;
+        return ones;
+    }
+
+    @Override public String toString() {
+        return network + "/" + getNetworkBitCount();
     }
 }

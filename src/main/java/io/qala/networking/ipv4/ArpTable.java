@@ -1,6 +1,6 @@
-package io.qala.networking.l2;
+package io.qala.networking.ipv4;
 
-import io.qala.networking.ipv4.IpAddress;
+import io.qala.networking.l2.Mac;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

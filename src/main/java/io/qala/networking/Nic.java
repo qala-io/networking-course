@@ -9,6 +9,6 @@ import io.qala.networking.l2.Mac;
  */
 public interface Nic extends Link<L2Packet> {
     void setEndpoint(Router<L2Packet> link);
-    void sendArp(IpAddress dst);
-    void send(IpAddress dstIp, Mac dstMac, Bytes body);
+    void sendArp(IpAddress srcIp, IpAddress dst);
+    void send(IpAddress srcIp, IpAddress dstIp, Mac dstMac, Bytes body);
 }
