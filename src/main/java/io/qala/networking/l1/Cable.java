@@ -1,9 +1,7 @@
 package io.qala.networking.l1;
 
 import io.qala.networking.Bytes;
-import io.qala.networking.EthNic2;
 import io.qala.networking.Nic2;
-import io.qala.networking.l2.L2Packet;
 
 public class Cable {
     private final Nic2 nic1, nic2;

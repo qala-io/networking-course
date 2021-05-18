@@ -1,22 +1,24 @@
 package io.qala.networking.ipv4;
 
-import io.qala.networking.Nic;
+import io.qala.networking.NetDevice;
 
 public class Route {
     private final NetworkId destination;
     private final IpAddress gateway;
-    private final Nic nic;
+    private final NetDevice dev;
+    private final RouteType type;
 
-    public Route(NetworkId destination, IpAddress gateway, Nic nic) {
+    public Route(NetworkId destination, IpAddress gateway, NetDevice dev, RouteType routeType) {
         this.destination = destination;
         this.gateway = gateway;
-        this.nic = nic;
+        this.dev = dev;
+        this.type = routeType;
     }
     public boolean isLocal() {
         return gateway.equals(IpAddress.MIN);
     }
-    public Nic getNic() {
-        return nic;
+    public NetDevice getDev() {
+        return dev;
     }
     public IpAddress getGateway() {
         return gateway;

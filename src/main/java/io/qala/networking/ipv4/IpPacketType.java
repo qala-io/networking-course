@@ -1,16 +1,11 @@
 package io.qala.networking.ipv4;
 
-import io.qala.networking.Nic;
 import io.qala.networking.TrafficStats;
 import io.qala.networking.l2.L2Packet;
 
-import java.util.HashMap;
-
 public class IpPacketType implements PacketType {
-    private final Routes rtable = new Routes();
+    private final RoutingTables rtables = new RoutingTables();
     private final TrafficStats trafficStats = new TrafficStats();
-    private final HashMap<Nic, IpAddress> nicIpAddress = new HashMap<>();
-    private final ArpTable arpTable = new ArpTable();
 
     /**
      * <a href="https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/ip_input.c#L531">ip_rcv</a>

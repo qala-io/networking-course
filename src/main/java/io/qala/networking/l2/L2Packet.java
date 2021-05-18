@@ -10,6 +10,9 @@ public class L2Packet {
      * In case of incoming request this is the device which received the packet.
      */
     private NetDevice dev;
+    /**
+     * Whether {@link #dst} matched MAC address of the NIC.
+     */
     private Boolean toUs;
 
     public L2Packet(Mac src, Mac dst, Bytes payload) {

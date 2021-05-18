@@ -3,7 +3,7 @@ package io.qala.networking;
 import io.qala.networking.ipv4.IpAddress;
 import io.qala.networking.ipv4.NetworkId;
 import io.qala.networking.ipv4.PacketType;
-import io.qala.networking.l2.DeviceMaster;
+import io.qala.networking.ipv4.RoutingTables;
 import io.qala.networking.l2.L2Packet;
 import io.qala.networking.l2.Mac;
 import org.slf4j.Logger;
@@ -18,7 +18,8 @@ public class NetDevice {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetDevice.class);
     private final PacketType[] packetTypes;
     private final String name = "eth" + numeric(5);
-    private DeviceMaster master;
+    private final RoutingTables rtables;
+    private NetDevice master;
     private Nic2 nic;
     /**
      * This is actually part of internet device, not just device.
@@ -26,9 +27,10 @@ public class NetDevice {
      */
     private final Set<IpAddress> ipAddresses = new HashSet<>();
 
-    public NetDevice(Nic2 nic, PacketType[] packetTypes) {
+    public NetDevice(Nic2 nic, PacketType[] packetTypes, RoutingTables rtables) {
         this.packetTypes = packetTypes;
         this.nic = nic;
+        this.rtables = rtables;
         nic.connectLinuxDevice(this);
         Loggers.TERMINAL_COMMANDS.info("ip link add {} type eth??", name);
     }
@@ -65,11 +67,13 @@ public class NetDevice {
         return nic.getMac();
     }
     public void addIpAddress(IpAddress ipAddress, NetworkId network) {
+        // in reality we add more routes - not just directly for the IP address, but for the whole network
+        rtables.local().addLocalRoute(network, this);
         ipAddresses.add(ipAddress);
         // for now we just log the network, but we also need to let routing table read it
         Loggers.TERMINAL_COMMANDS.info("ip addr add {}/{} dev {}", ipAddress, network.getNetworkBitCount(), name);
     }
-    public void setMaster(DeviceMaster master) {
+    public void setMaster(NetDevice master) {
         Loggers.TERMINAL_COMMANDS.info("ip link set dev {} master {}", name, master);
         this.master = master;
     }

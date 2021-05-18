@@ -7,12 +7,14 @@ import io.qala.networking.l2.L2Packet;
  */
 public class ArpPacketType implements PacketType {
     private final ArpTable arpTable;
+    private final RoutingTables rtable;
 
-    public ArpPacketType() {
-        this(new ArpTable());
+    public ArpPacketType(RoutingTables rtables) {
+        this(new ArpTable(), rtables);
     }
-    public ArpPacketType(ArpTable arpTable) {
+    public ArpPacketType(ArpTable arpTable, RoutingTables rtables) {
         this.arpTable = arpTable;
+        this.rtable = rtables;
     }
 
     /**
@@ -21,7 +23,11 @@ public class ArpPacketType implements PacketType {
     @Override
     public void rcv(L2Packet l2) {
         ArpPacket arp = new ArpPacket(l2);
-        if(!l2.getDev().matches(arp.dstIp())) //https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/arp.c#L824
+        // we'll accept ARP in either case:
+        // local route: https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/arp.c#L821
+        // remote route: https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/arp.c#L838
+        Route rt = rtable.lookup(arp.dstIp());//https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/arp.c#L818
+        if(rt == null)
             return;
         arpTable.put(arp.srcIp(), arp.srcMac());
         //netfilter NF_ARP_IN
@@ -30,6 +36,7 @@ public class ArpPacketType implements PacketType {
             // netfilter NF_ARP_OUT
             l2.getDev().send(arp.createReply(l2.getDev().getMac()).toL2());
     }
+
 
     @Override
     public boolean matches(L2Packet l2) {

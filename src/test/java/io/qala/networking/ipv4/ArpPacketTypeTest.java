@@ -1,6 +1,6 @@
 package io.qala.networking.ipv4;
 
-import io.qala.networking.EthNic2;
+import io.qala.networking.EthNic;
 import io.qala.networking.NetDevice;
 import io.qala.networking.SpyNic;
 import io.qala.networking.l1.Cable;
@@ -12,77 +12,97 @@ import static org.junit.Assert.*;
 
 public class ArpPacketTypeTest {
     @Test public void respondsToArpReq_ifDstIpMatches() {
-        NetworkId network = NetworkId.random();
-        IpAddress dstIp = network.randomAddr();
-        EthNic2 eth = new EthNic2();
+        Host host = new Host();
         SpyNic senderNic = new SpyNic();
-        new Cable(eth, senderNic);
-        new NetDevice(eth, PacketType.createAllPacketTypes()).addIpAddress(dstIp, network);
+        new Cable(host.net1.eth, senderNic);
 
-        ArpPacket arpReq = ArpPacket.req(Mac.random(), IpAddress.random(), Mac.BROADCAST, dstIp);
-        eth.receive(arpReq.toL2().toBytes());
+        ArpPacket arpReq = ArpPacket.req(Mac.random(), IpAddress.random(), Mac.BROADCAST, host.net1.ipAddress);
+        host.net1.eth.receive(arpReq.toL2().toBytes());
         assertEquals(1, senderNic.receivedPackets.size());
 
         ArpPacket arpReply = new ArpPacket(new L2Packet(senderNic.receivedPackets.get(0), null));
         assertTrue(arpReply.isReply());
         assertEquals(arpReq.srcMac(), arpReply.dstMac());
-        assertEquals(eth.getMac(), arpReply.srcMac());
-        assertEquals(dstIp, arpReply.srcIp());
+        assertEquals(host.net1.eth.getMac(), arpReply.srcMac());
+        assertEquals(host.net1.ipAddress, arpReply.srcIp());
+        assertEquals(arpReq.srcIp(), arpReply.dstIp());
+    }
+    /**
+     * Linux owns the IP addresses, not each {@link NetDevice} separately (though they do have it too).
+     */
+    @Test public void respondsToArpReq_ifDstIpMatchesAnotherNetworkInterfaceOnSameHost() {
+        Host host = new Host();
+        SpyNic senderNic = new SpyNic();
+        new Cable(host.net1.eth, senderNic);
+
+        ArpPacket arpReq = ArpPacket.req(Mac.random(), IpAddress.random(), Mac.BROADCAST, host.net2.ipAddress);
+        host.net1.eth.receive(arpReq.toL2().toBytes());
+        assertEquals(1, senderNic.receivedPackets.size());
+
+        ArpPacket arpReply = new ArpPacket(new L2Packet(senderNic.receivedPackets.get(0), null));
+        assertTrue(arpReply.isReply());
+        assertEquals(arpReq.srcMac(), arpReply.dstMac());
+        assertEquals(host.net1.eth.getMac(), arpReply.srcMac());
+        assertEquals(host.net2.ipAddress, arpReply.srcIp());
         assertEquals(arpReq.srcIp(), arpReply.dstIp());
     }
     @Test public void dropsArpReq_ifDstIpDoesNotMatch() {
-        EthNic2 eth = new EthNic2();
+        Host host = new Host();
         SpyNic senderNic = new SpyNic();
-        new Cable(eth, senderNic);
-        NetworkId network = NetworkId.random();
-        new NetDevice(eth, PacketType.createAllPacketTypes()).addIpAddress(network.randomAddr(), network);
+        new Cable(host.net1.eth, senderNic);
 
         ArpPacket arpReq = ArpPacket.req(Mac.random(), IpAddress.random(), Mac.BROADCAST, IpAddress.random());
-        eth.receive(arpReq.toL2().toBytes());
+        host.net1.eth.receive(arpReq.toL2().toBytes());
         assertEquals(0, senderNic.receivedPackets.size());
     }
     @Test public void storesReceivedArpReq_intoArpTable() {
-        PacketType[] packetTypes = PacketType.createAllPacketTypes();
-        NetworkId network = NetworkId.random();
-        IpAddress dstIp = network.randomAddr();
-        EthNic2 eth = new EthNic2();
-        new Cable(eth, new SpyNic());
-        new NetDevice(eth, packetTypes).addIpAddress(dstIp, network);
+        Host host = new Host();
+        new Cable(host.net1.eth, new SpyNic());
 
-        ArpPacket arpReq = ArpPacket.req(Mac.random(), IpAddress.random(), Mac.BROADCAST, dstIp);
-        eth.receive(arpReq.toL2().toBytes());
-        ArpTable arpTable = ((ArpPacketType) packetTypes[0]).getArpTable();
+        ArpPacket arpReq = ArpPacket.req(Mac.random(), IpAddress.random(), Mac.BROADCAST, host.net1.ipAddress);
+        host.net1.eth.receive(arpReq.toL2().toBytes());
+        ArpTable arpTable = host.getArpTable();
         assertEquals(arpReq.srcMac(), arpTable.get(arpReq.srcIp()));
     }
     @Test public void storesResultOfArpReplyToArpTable() {
-        HostNetwork host1 = new HostNetwork();
-        HostNetwork host2 = new HostNetwork();
-        new Cable(host1.eth, host2.eth);
+        Host host1 = new Host();
+        Host host2 = new Host();
+        new Cable(host1.net1.eth, host2.net1.eth);
 
-        ArpPacket arpReq = ArpPacket.req(host1.net.getMac(), host1.ipAddress, Mac.BROADCAST, host2.ipAddress);
-        host1.eth.send(arpReq.toL2());
+        ArpPacket arpReq = ArpPacket.req(host1.net1.eth.getMac(), host1.net1.ipAddress, Mac.BROADCAST, host2.net1.ipAddress);
+        host1.net1.eth.send(arpReq.toL2());
 
-        assertEquals(host2.eth.getMac(), host1.getArpTable().get(host2.ipAddress));
-        assertEquals(host1.eth.getMac(), host2.getArpTable().get(host1.ipAddress));
+        assertEquals(host2.net1.eth.getMac(), host1.getArpTable().get(host2.net1.ipAddress));
+        assertEquals(host1.net1.eth.getMac(), host2.getArpTable().get(host1.net1.ipAddress));
     }
 
-    static class HostNetwork {
-        final NetworkId network;
-        final IpAddress ipAddress;
-        final EthNic2 eth;
-        final PacketType[] packetTypes = PacketType.createAllPacketTypes();
-        final NetDevice net;
+    static class Host {
+        final Network net1, net2;
+        final PacketType[] packetTypes;
 
-        public HostNetwork() {
-            network = NetworkId.random();
-            ipAddress = network.randomAddr();
-            eth = new EthNic2();
-            net = new NetDevice(eth, packetTypes);
-            net.addIpAddress(ipAddress, network);
+        public Host() {
+            RoutingTables rtables = new RoutingTables();
+            packetTypes = PacketType.createAllPacketTypes(rtables);
+            net1 = new Network(rtables, packetTypes);
+            net2 = new Network(rtables, packetTypes);
         }
 
         ArpTable getArpTable() {
             return ((ArpPacketType) packetTypes[0]).getArpTable();
+        }
+    }
+    static class Network {
+        final NetworkId network;
+        final IpAddress ipAddress;
+        final EthNic eth;
+        final NetDevice dev;
+
+        Network(RoutingTables rtables, PacketType[] packetTypes) {
+            network = NetworkId.random();
+            ipAddress = network.randomAddr();
+            eth = new EthNic();
+            dev = new NetDevice(eth, packetTypes, rtables);
+            dev.addIpAddress(ipAddress, network);
         }
     }
 }

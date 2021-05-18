@@ -11,7 +11,7 @@ import java.util.HashMap;
 public class Kernel {
     private static final Logger LOGGER = LoggerFactory.getLogger(Kernel.class);
     private final ArpTable arpTable = new ArpTable();
-    private final Routes routes = new Routes();
+    private final RoutingTable routes = new RoutingTable();
     private final TrafficStats trafficStats = new TrafficStats();
     private final HashMap<Nic, IpAddress> nicIpAddress = new HashMap<>();
 
@@ -23,13 +23,13 @@ public class Kernel {
     }
     public void send(IpAddress dstIp, Bytes payload) {
         Route route = routes.getRoute(dstIp);
-        Nic nic = route.getNic();
+        NetDevice nic = route.getDev();
         // if it's a local route - same IP is returned, otherwise the gateway is returned
         IpAddress nextHopIp = route.getNextHopFor(dstIp);
-        IpAddress srcIp = nicIpAddress.get(nic);
-        Mac dstMac = arpTable.getOrCompute(nextHopIp, () -> nic.sendArp(srcIp, nextHopIp));
-        nic.send(srcIp, dstIp, dstMac, payload);
-        trafficStats.sentPacket(nic);
+//        IpAddress srcIp = nicIpAddress.get(nic);
+//        Mac dstMac = arpTable.getOrCompute(nextHopIp, () -> nic.sendArp(srcIp, nextHopIp));
+//        nic.send(srcIp, dstIp, dstMac, payload);
+//        trafficStats.sentPacket(nic);
     }
     public void route(IpPacket ipPacket) {
 
@@ -41,7 +41,7 @@ public class Kernel {
     ArpTable getArpTable() {
         return arpTable;
     }
-    Routes getRoutes() {
+    RoutingTable getRoutes() {
         return routes;
     }
     TrafficStats getTrafficStats() {
