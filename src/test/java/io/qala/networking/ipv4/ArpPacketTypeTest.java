@@ -92,13 +92,13 @@ public class ArpPacketTypeTest {
         }
     }
     static class Network {
-        final NetworkId network;
+        final Cidr network;
         final IpAddress ipAddress;
         final EthNic eth;
         final NetDevice dev;
 
         Network(RoutingTables rtables, PacketType[] packetTypes) {
-            network = NetworkId.random();
+            network = Cidr.random();
             ipAddress = network.randomAddr();
             eth = new EthNic();
             dev = new NetDevice(eth, packetTypes, rtables);

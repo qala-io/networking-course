@@ -3,12 +3,12 @@ package io.qala.networking.ipv4;
 import io.qala.networking.NetDevice;
 
 public class Route {
-    private final NetworkId destination;
+    private final Cidr destination;
     private final IpAddress gateway;
     private final NetDevice dev;
     private final RouteType type;
 
-    public Route(NetworkId destination, IpAddress gateway, NetDevice dev, RouteType routeType) {
+    public Route(Cidr destination, IpAddress gateway, NetDevice dev, RouteType routeType) {
         this.destination = destination;
         this.gateway = gateway;
         this.dev = dev;

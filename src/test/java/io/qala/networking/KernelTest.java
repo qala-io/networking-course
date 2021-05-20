@@ -1,9 +1,6 @@
 package io.qala.networking;
 
-import io.qala.networking.ipv4.IpAddress;
-import io.qala.networking.ipv4.IpPacket;
-import io.qala.networking.ipv4.NetworkId;
-import io.qala.networking.l2.Bridge;
+import io.qala.networking.ipv4.Cidr;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -11,7 +8,7 @@ import static org.junit.Assert.assertEquals;
 public class KernelTest {
 
     @Test public void requestsForMacAddressBeforeSendingIpPacketOnSameNetwork() {
-        NetworkId network = NetworkId.random();
+        Cidr network = Cidr.random();
 
         Kernel k1 = new Kernel();
 //        EthNic nic1 = new EthNic(IpAddress.random(), k1);
@@ -35,7 +32,7 @@ public class KernelTest {
      * gateway sends IP 1.1.1.1 with final node's MAC
      */
     @Test public void hopsToNextRouterIfGatewayIsConfigured() {
-        NetworkId network = new NetworkId("1.1.1.0/24");
+        Cidr network = new Cidr("1.1.1.0/24");
         Kernel k1 = new Kernel();
 //        EthNic nic1 = new EthNic(new IpAddress("127.0.0.1"), k1);
 //        IpAddress gateway = new IpAddress("2.2.2.2");

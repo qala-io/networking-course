@@ -1,7 +1,7 @@
 package io.qala.networking;
 
 import io.qala.networking.ipv4.IpAddress;
-import io.qala.networking.ipv4.NetworkId;
+import io.qala.networking.ipv4.Cidr;
 import io.qala.networking.ipv4.PacketType;
 import io.qala.networking.ipv4.RoutingTables;
 import io.qala.networking.l2.L2Packet;
@@ -66,7 +66,7 @@ public class NetDevice {
     public Mac getMac() {
         return nic.getMac();
     }
-    public void addIpAddress(IpAddress ipAddress, NetworkId network) {
+    public void addIpAddress(IpAddress ipAddress, Cidr network) {
         // in reality we add more routes - not just directly for the IP address, but for the whole network
         rtables.local().addLocalRoute(network, this);
         ipAddresses.add(ipAddress);
