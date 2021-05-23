@@ -45,6 +45,13 @@ public class IpRange {
     public IpAddress getAddress() {
         return address;
     }
+    /**
+     * In case {@link #address} is a specific address like 192.168.0.1 and we want only first
+     * {@link #getNetworkBitCount()} bits out of it.
+     */
+    public IpRange toSubnet() {
+        return new IpRange(new IpAddress(address.asInt() & mask.asInt()), mask);
+    }
 
     public static IpRange randomAddressInRange() {
         IpRange random = random();

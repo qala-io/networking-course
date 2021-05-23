@@ -63,4 +63,9 @@ public class IpRangeTest {
         assertFalse(range.matches(IpAddress.random()));
         assertTrue(range.matches(new IpAddress("10.20.30.40")));
     }
+    @Test public void canReturnSubnetWithoutExtraBits() {
+        assertEquals(new IpRange("135.75.0.0/16"), new IpRange("135.75.2.1/16").toSubnet());
+        assertEquals(new IpRange("135.75.2.1/32"), new IpRange("135.75.2.1/32").toSubnet());
+        assertEquals(new IpRange("0.0.0.0/0"), new IpRange("0.0.0.0/0").toSubnet());
+    }
 }

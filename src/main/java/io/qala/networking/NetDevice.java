@@ -54,18 +54,14 @@ public class NetDevice {
         nic.send(l2);
     }
 
-    /**
-     * <a href="https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/devinet.c#L1370">confirm_addr_indev()</a>
-     */
-    public boolean matches(IpAddress ipAddress) {
-        return ipAddresses.contains(ipAddress);
-    }
     public Mac getMac() {
         return nic.getMac();
     }
     public void addIpAddress(IpRange range) {
         // in reality we add more routes - not just directly for the IP address, but for the whole network
         rtables.local().add(new Route(new IpRange(range.getAddress(), 32), null, this, RouteType.LOCAL));
+        // in reality this happens only if the interface is UP
+        rtables.main().add(new Route(range.toSubnet(), null, this, RouteType.REMOTE));
         ipAddresses.add(range);
         // for now we just log the network, but we also need to let routing table read it
         Loggers.TERMINAL_COMMANDS.info("ip addr add {} dev {}", range, name);
