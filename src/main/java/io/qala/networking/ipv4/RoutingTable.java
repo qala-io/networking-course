@@ -37,6 +37,16 @@ public class RoutingTable {
         Loggers.TERMINAL_COMMANDS.info("ip route add {} via {} dev {}", destination, gateway, dev);
         rangeRoutes.put(destination, new Route(destination, gateway, dev, RouteType.REMOTE/*??*/));
     }
+    /**
+     * Real route lookup is more sophisticated:
+     * <ol>
+     *     <li>It may use more data about the routes to find which one is suited better when multiple routes match
+     *     the address</li>
+     *     <li>Also more parameters about the requests & devices can be used with Policy Routing</li>
+     *     <li>An external route may have multiple gateways configured and it's possible to configure which of the
+     *     gateways to use and when</li>
+     * </ol>
+     */
     public Route lookup(IpAddress ip) {
         Route route = singleHostRoutes.get(ip);
         if(route != null)
