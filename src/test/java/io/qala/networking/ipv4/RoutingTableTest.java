@@ -32,6 +32,16 @@ public class RoutingTableTest {
         Route route = routes.lookup(new IpAddress("10.12.12.5"));
         assertSame(dev, route.getDev());
     }
+    @Test public void ifMultipleRoutesMatch_chooseMostSpecific() {
+        NetDevice dev = dev();
+        RoutingTable routes = new RoutingTable();
+        routes.addRoute(new IpRange("10.12.12.0/24"), null, dev);
+        routes.addRoute(new IpRange("10.12.12.128/25"), null, dev);
+        routes.addRoute(new IpRange("10.12.0.0/16"), null, dev);
+
+        Route route = routes.lookup(new IpAddress("10.12.12.130"));
+        assertEquals(new IpRange("10.12.12.128/25"), route.getDestination());
+    }
     @Test public void nullIfNoRoutesMatch() {
         RoutingTable routes = new RoutingTable();
         callNoneOrMore(

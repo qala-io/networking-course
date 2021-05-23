@@ -3,12 +3,18 @@ package io.qala.networking.ipv4;
 import io.qala.networking.Loggers;
 import io.qala.networking.NetDevice;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class RoutingTable {
     private static final IpRange DEFAULT_ROUTE = new IpRange("0.0.0.0/0");
-    private final Map<IpRange, Route> rangeRoutes = new HashMap<>();
+    private final Map<IpRange, Route> rangeRoutes = new TreeMap<>(
+            // The most specific route (with most bits in mask) should come first to have higher priority.
+            // In real Kernel though there are more rules to resolve ties
+            Comparator.comparingInt(IpRange::getNetworkBitCount).reversed()
+    );
     private final Map<IpAddress, Route> singleHostRoutes = new HashMap<>();
     public RoutingTable() { }
 
