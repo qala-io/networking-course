@@ -1,6 +1,5 @@
 package io.qala.networking.ipv4;
 
-import io.qala.networking.EthNic;
 import io.qala.networking.NetDevice;
 import io.qala.networking.SpyNic;
 import io.qala.networking.l1.Cable;
@@ -32,19 +31,19 @@ public class ArpPacketTypeTest {
      * Linux owns the IP addresses, not each {@link NetDevice} separately (though they do have it too).
      */
     @Test public void respondsToArpReq_ifDstIpMatchesAnotherNetworkInterfaceOnSameHost() {
-        Host host = new Host();
+        Host host = new Host().withNets(2);
         SpyNic senderNic = new SpyNic();
         new Cable(host.net1.eth, senderNic);
 
-        ArpPacket arpReq = ArpPacket.req(Mac.random(), IpAddress.random(), Mac.BROADCAST, host.net2.ipAddress);
+        ArpPacket arpReq = ArpPacket.req(Mac.random(), IpAddress.random(), Mac.BROADCAST, host.nets.get(1).ipAddress);
         host.net1.eth.receive(arpReq.toL2().toBytes());
         assertEquals(1, senderNic.receivedPackets.size());
 
         ArpPacket arpReply = new ArpPacket(new L2Packet(senderNic.receivedPackets.get(0), null));
         assertTrue(arpReply.isReply());
         assertEquals(arpReq.srcMac(), arpReply.dstMac());
-        assertEquals(host.net1.eth.getMac(), arpReply.srcMac());
-        assertEquals(host.net2.ipAddress, arpReply.srcIp());
+        assertEquals(host.nets.get(0).eth.getMac(), arpReply.srcMac());
+        assertEquals(host.nets.get(1).ipAddress, arpReply.srcIp());
         assertEquals(arpReq.srcIp(), arpReply.dstIp());
     }
     @Test public void dropsArpReq_ifDstIpDoesNotMatch() {
