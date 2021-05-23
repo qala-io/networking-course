@@ -7,29 +7,41 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RoutingTable {
-    private Route defaultGateway;
-    private final Map<Cidr, Route> table = new HashMap<>();
+    private static final IpRange DEFAULT_ROUTE = new IpRange("0.0.0.0/0");
+    private final Map<IpRange, Route> rangeRoutes = new HashMap<>();
+    private final Map<IpAddress, Route> singleHostRoutes = new HashMap<>();
     public RoutingTable() { }
-    public RoutingTable(IpAddress defaultGateway, NetDevice device) {
-         addDefaultRoute(defaultGateway, device);
+
+    public void add(Route route) {
+        if(route.getDestination().getNetworkBitCount() == 32)
+            singleHostRoutes.put(route.getDestination().getAddress(), route);
+        else
+            rangeRoutes.put(route.getDestination(), route);
+    }
+
+    public void addDefaultRoute(NetDevice dev) {
+        Loggers.TERMINAL_COMMANDS.info("ip route add default dev {}", dev);
+        rangeRoutes.put(DEFAULT_ROUTE, new Route(DEFAULT_ROUTE, null, dev, RouteType.LOCAL));
     }
     public void addDefaultRoute(IpAddress gateway, NetDevice dev) {
         Loggers.TERMINAL_COMMANDS.info("ip route add default via {} dev {}", gateway, dev);
-        Cidr defaultDestination = new Cidr(IpAddress.MIN, IpAddress.MAX);
-        this.defaultGateway = new Route(defaultDestination, gateway, dev, RouteType.REMOTE/*??*/);
+        rangeRoutes.put(DEFAULT_ROUTE, new Route(DEFAULT_ROUTE, gateway, dev, RouteType.REMOTE/*??*/));
     }
-    public void addLocalRoute(Cidr destination, NetDevice dev) {
+    public void addLocalRoute(IpRange destination, NetDevice dev) {
         Loggers.TERMINAL_COMMANDS.info("ip route add to local {} dev {}", destination, dev);
-        table.put(destination, new Route(destination, IpAddress.MIN, dev, RouteType.LOCAL));
+        rangeRoutes.put(destination, new Route(destination, IpAddress.MIN, dev, RouteType.LOCAL));
     }
-    public void addGatewayRoute(Cidr destination, IpAddress gateway, NetDevice dev) {
+    public void addGatewayRoute(IpRange destination, IpAddress gateway, NetDevice dev) {
         Loggers.TERMINAL_COMMANDS.info("ip route add {} via {} dev {}", destination, gateway, dev);
-        table.put(destination, new Route(destination, gateway, dev, RouteType.REMOTE/*??*/));
+        rangeRoutes.put(destination, new Route(destination, gateway, dev, RouteType.REMOTE/*??*/));
     }
-    public Route getRoute(IpAddress ip ) {
-        for (Map.Entry<Cidr, Route> entry : table.entrySet())
+    public Route getRoute(IpAddress ip) {
+        Route route = singleHostRoutes.get(ip);
+        if(route != null)
+            return route;
+        for (Map.Entry<IpRange, Route> entry : rangeRoutes.entrySet())
             if (entry.getKey().matches(ip))
                 return entry.getValue();
-        return defaultGateway;
+        return null;
     }
 }

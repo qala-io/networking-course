@@ -1,9 +1,6 @@
 package io.qala.networking;
 
-import io.qala.networking.ipv4.IpAddress;
-import io.qala.networking.ipv4.Cidr;
-import io.qala.networking.ipv4.PacketType;
-import io.qala.networking.ipv4.RoutingTables;
+import io.qala.networking.ipv4.*;
 import io.qala.networking.l2.L2Packet;
 import io.qala.networking.l2.Mac;
 import org.slf4j.Logger;
@@ -25,7 +22,7 @@ public class NetDevice {
      * This is actually part of internet device, not just device.
      * <a href="https://elixir.bootlin.com/linux/v5.12.1/source/include/linux/inetdevice.h#L29">in_device->in_ifaddr</a>
      */
-    private final Set<IpAddress> ipAddresses = new HashSet<>();
+    private final Set<IpRange> ipAddresses = new HashSet<>();
 
     public NetDevice(Nic2 nic, PacketType[] packetTypes, RoutingTables rtables) {
         this.packetTypes = packetTypes;
@@ -66,12 +63,12 @@ public class NetDevice {
     public Mac getMac() {
         return nic.getMac();
     }
-    public void addIpAddress(IpAddress ipAddress, Cidr network) {
+    public void addIpAddress(IpRange range) {
         // in reality we add more routes - not just directly for the IP address, but for the whole network
-        rtables.local().addLocalRoute(network, this);
-        ipAddresses.add(ipAddress);
+        rtables.local().add(new Route(new IpRange(range.getAddress(), 32), null, this, RouteType.LOCAL));
+        ipAddresses.add(range);
         // for now we just log the network, but we also need to let routing table read it
-        Loggers.TERMINAL_COMMANDS.info("ip addr add {}/{} dev {}", ipAddress, network.getNetworkBitCount(), name);
+        Loggers.TERMINAL_COMMANDS.info("ip addr add {} dev {}", range, name);
     }
     public void setMaster(NetDevice master) {
         Loggers.TERMINAL_COMMANDS.info("ip link set dev {} master {}", name, master);

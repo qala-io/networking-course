@@ -8,7 +8,7 @@ import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEqua
 
 public class ArpPacketTest {
     @Test public void canConvertToAndFromBytes() {
-        Cidr network = Cidr.random();
+        IpRange network = IpRange.random();
         ArpPacket sent = new ArpPacket(
                 sample(ArpPacket.Type.values()),
                 Mac.random(), Mac.random(),

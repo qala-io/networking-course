@@ -8,7 +8,8 @@ import io.qala.networking.l2.L2Packet;
 import io.qala.networking.l2.Mac;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ArpPacketTypeTest {
     @Test public void respondsToArpReq_ifDstIpMatches() {
@@ -76,33 +77,4 @@ public class ArpPacketTypeTest {
         assertEquals(host1.net1.eth.getMac(), host2.getArpTable().get(host1.net1.ipAddress));
     }
 
-    static class Host {
-        final Network net1, net2;
-        final PacketType[] packetTypes;
-
-        public Host() {
-            RoutingTables rtables = new RoutingTables();
-            packetTypes = PacketType.createAllPacketTypes(rtables);
-            net1 = new Network(rtables, packetTypes);
-            net2 = new Network(rtables, packetTypes);
-        }
-
-        ArpTable getArpTable() {
-            return ((ArpPacketType) packetTypes[0]).getArpTable();
-        }
-    }
-    static class Network {
-        final Cidr network;
-        final IpAddress ipAddress;
-        final EthNic eth;
-        final NetDevice dev;
-
-        Network(RoutingTables rtables, PacketType[] packetTypes) {
-            network = Cidr.random();
-            ipAddress = network.randomAddr();
-            eth = new EthNic();
-            dev = new NetDevice(eth, packetTypes, rtables);
-            dev.addIpAddress(ipAddress, network);
-        }
-    }
 }
