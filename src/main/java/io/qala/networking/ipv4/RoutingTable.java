@@ -12,7 +12,7 @@ public class RoutingTable {
     private final Map<IpAddress, Route> singleHostRoutes = new HashMap<>();
     public RoutingTable() { }
 
-    public void add(Route route) {
+    public void add(Route route) {// see other methods for the right terminal commands of iproute2 package
         if(route.getDestination().getNetworkBitCount() == 32)
             singleHostRoutes.put(route.getDestination().getAddress(), route);
         else
@@ -21,21 +21,17 @@ public class RoutingTable {
 
     public void addDefaultRoute(NetDevice dev) {
         Loggers.TERMINAL_COMMANDS.info("ip route add default dev {}", dev);
-        rangeRoutes.put(DEFAULT_ROUTE, new Route(DEFAULT_ROUTE, null, dev, RouteType.LOCAL));
+        add(new Route(DEFAULT_ROUTE, null, dev, RouteType.LOCAL));
     }
     public void addDefaultRoute(IpAddress gateway, NetDevice dev) {
         Loggers.TERMINAL_COMMANDS.info("ip route add default via {} dev {}", gateway, dev);
-        rangeRoutes.put(DEFAULT_ROUTE, new Route(DEFAULT_ROUTE, gateway, dev, RouteType.REMOTE/*??*/));
+        add(new Route(DEFAULT_ROUTE, gateway, dev, RouteType.REMOTE/*??*/));
     }
-    public void addLocalRoute(IpRange destination, NetDevice dev) {
-        Loggers.TERMINAL_COMMANDS.info("ip route add to local {} dev {}", destination, dev);
-        rangeRoutes.put(destination, new Route(destination, IpAddress.MIN, dev, RouteType.LOCAL));
-    }
-    public void addGatewayRoute(IpRange destination, IpAddress gateway, NetDevice dev) {
+    public void addRoute(IpRange destination, IpAddress gateway, NetDevice dev) {
         Loggers.TERMINAL_COMMANDS.info("ip route add {} via {} dev {}", destination, gateway, dev);
         rangeRoutes.put(destination, new Route(destination, gateway, dev, RouteType.REMOTE/*??*/));
     }
-    public Route getRoute(IpAddress ip) {
+    public Route lookup(IpAddress ip) {
         Route route = singleHostRoutes.get(ip);
         if(route != null)
             return route;

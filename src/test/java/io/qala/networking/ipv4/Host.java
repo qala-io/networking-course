@@ -19,10 +19,9 @@ public class Host {
             addNet();
         return this;
     }
-    public Network addNet() {
+    public void addNet() {
         Network net = new Network(rtables, packetTypes);
         nets.add(net);
-        return net;
     }
 
     ArpTable getArpTable() {

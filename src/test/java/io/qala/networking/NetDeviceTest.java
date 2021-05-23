@@ -14,7 +14,7 @@ public class NetDeviceTest {
         NetDevice dev = new NetDevice(new SpyNic(), packetTypes, rtables);
         dev.addIpAddress(network);
 
-        Route route = rtables.local().getRoute(network.getAddress());
+        Route route = rtables.local().lookup(network.getAddress());
         assertEquals(network.getAddress(), route.getDestination().getAddress());
         assertSame(dev, route.getDev());
     }

@@ -26,7 +26,7 @@ public class ArpPacketType implements PacketType {
         // we'll accept ARP in either case:
         // local route: https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/arp.c#L821
         // remote route: https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/arp.c#L838
-        Route rt = rtable.lookup(arp.dstIp());//https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/arp.c#L818
+        Route rt = rtable.local().lookup(arp.dstIp());//https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/arp.c#L818
         if(rt == null)
             return;
         arpTable.put(arp.srcIp(), arp.srcMac());

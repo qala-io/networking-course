@@ -12,9 +12,25 @@ public class RoutingTableTest {
         RoutingTable routes = new RoutingTable();
         routes.addDefaultRoute(dev);
 
-        Route route = routes.getRoute(IpAddress.random());
+        Route route = routes.lookup(IpAddress.random());
         assertSame(dev, route.getDev());
         assertEquals(new IpRange("0.0.0.0/0"), route.getDestination());
+    }
+    @Test public void matchesExactlyIfRouteIsToHost() {
+        NetDevice dev = dev();
+        RoutingTable routes = new RoutingTable();
+        routes.addRoute(new IpRange("10.12.12.1/32"), null, dev);
+
+        Route route = routes.lookup(new IpAddress("10.12.12.1"));
+        assertSame(dev, route.getDev());
+    }
+    @Test public void matchesBySubnetIfRouteIsForRange() {
+        NetDevice dev = dev();
+        RoutingTable routes = new RoutingTable();
+        routes.addRoute(new IpRange("10.12.12.0/24"), null, dev);
+
+        Route route = routes.lookup(new IpAddress("10.12.12.5"));
+        assertSame(dev, route.getDev());
     }
     @Test public void nullIfNoRoutesMatch() {
         RoutingTable routes = new RoutingTable();
@@ -23,7 +39,7 @@ public class RoutingTableTest {
                 () -> routes.add(new Route(new IpRange("10.30.50.120/8"), null, dev(), RouteType.LOCAL))
         );
 
-        assertNull(routes.getRoute(new IpAddress("11.67.0.1")));
+        assertNull(routes.lookup(new IpAddress("11.67.0.1")));
     }
 
     private static NetDevice dev() {

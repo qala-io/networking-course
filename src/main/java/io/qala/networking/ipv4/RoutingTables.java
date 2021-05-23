@@ -10,10 +10,4 @@ public class RoutingTables {
     public RoutingTable main() {
         return main;
     }
-    public Route lookup(IpAddress ipAddress) {
-        Route route = local.getRoute(ipAddress);
-        if(route == null)
-            route = main.getRoute(ipAddress);
-        return route;
-    }
 }
