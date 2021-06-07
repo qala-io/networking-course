@@ -62,7 +62,7 @@ public class ArpPacketTypeTest {
         ArpPacket arpReq = ArpPacket.req(Mac.random(), IpAddress.random(), Mac.BROADCAST, host.net1.ipAddress);
         host.net1.eth.receive(arpReq.toL2().toBytes());
         ArpTable arpTable = host.getArpTable();
-        assertEquals(arpReq.srcMac(), arpTable.get(arpReq.srcIp()));
+        assertEquals(arpReq.srcMac(), arpTable.getNeighbor(arpReq.srcIp(), host.net1.dev));
     }
     @Test public void storesResultOfArpReplyToArpTable() {
         Host host1 = new Host();
@@ -72,8 +72,8 @@ public class ArpPacketTypeTest {
         ArpPacket arpReq = ArpPacket.req(host1.net1.eth.getMac(), host1.net1.ipAddress, Mac.BROADCAST, host2.net1.ipAddress);
         host1.net1.eth.send(arpReq.toL2());
 
-        assertEquals(host2.net1.eth.getMac(), host1.getArpTable().get(host2.net1.ipAddress));
-        assertEquals(host1.net1.eth.getMac(), host2.getArpTable().get(host1.net1.ipAddress));
+        assertEquals(host2.net1.eth.getMac(), host1.getArpTable().getNeighbor(host2.net1.ipAddress, host1.net1.dev));
+        assertEquals(host1.net1.eth.getMac(), host2.getArpTable().getNeighbor(host1.net1.ipAddress, host2.net1.dev));
     }
 
     @Test public void senderFillArpTableAfterReplyComesBack() {
@@ -81,9 +81,9 @@ public class ArpPacketTypeTest {
         Host host2 = new Host();
         new Cable(host1.net1.eth, host2.net1.eth);
 
-        Mac neighbor = host1.getArpPacketType().getNeighbor(host1.net1.dev, host2.net1.ipAddress);
+        Mac neighbor = host1.getArpTable().getNeighbor(host2.net1.ipAddress, host1.net1.dev);
         assertEquals(host2.net1.eth.getMac(), neighbor);
-        assertEquals(host2.net1.eth.getMac(), host1.getArpTable().get(host2.net1.ipAddress));
-        assertEquals(host1.net1.eth.getMac(), host2.getArpTable().get(host1.net1.ipAddress));
+        assertEquals(host2.net1.eth.getMac(), host1.getArpTable().getNeighbor(host2.net1.ipAddress, host1.net1.dev));
+        assertEquals(host1.net1.eth.getMac(), host2.getArpTable().getNeighbor(host1.net1.ipAddress, host2.net1.dev));
     }
 }

@@ -1,5 +1,6 @@
 package io.qala.networking.ipv4;
 
+import io.qala.networking.NetDevice;
 import io.qala.networking.l2.Mac;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,18 +16,17 @@ public class ArpTable {
         LOGGER.trace("Updating ARP table with [{} -> {}]", ip, mac);
         dynamicIps.put(ip, mac);
     }
-    public Mac getOrCompute(IpAddress ip, Runnable sendingArp) {
-        Mac mac = get(ip);
+    public Mac getNeighbor(IpAddress dst, NetDevice dev) {
+        Mac mac = dynamicIps.get(dst);
         if(mac == null) {
+            // does the ArpTable prepares the data for the request itself or the ArpRequestType?
             // in real life this is async and OS has to wait until ARP table is updated
-            sendingArp.run();
-            mac = get(ip);
+            ArpPacket arpReq = ArpPacket.req(dev.getMac(), dev.getIpAddress(), Mac.BROADCAST, dst);
+            dev.send(arpReq.toL2());
+            mac = dynamicIps.get(dst);
         }
         if(mac == null)
-            throw new RuntimeException("Couldn't get MAC address for IP " + ip);
+            throw new RuntimeException("Couldn't get MAC address for IP " + dst);
         return mac;
-    }
-    public Mac get(IpAddress ip) {
-        return dynamicIps.get(ip);
     }
 }

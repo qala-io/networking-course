@@ -10,7 +10,7 @@ public class Host {
     final PacketType[] packetTypes;
 
     public Host() {
-        packetTypes = PacketType.createAllPacketTypes(rtables);
+        packetTypes = PacketType.createAllPacketTypes(new ArpTable(), rtables);
         net1 = new Network(rtables, packetTypes);
         nets.add(net1);
     }
@@ -29,5 +29,8 @@ public class Host {
     }
     public ArpPacketType getArpPacketType() {
         return (ArpPacketType) packetTypes[0];
+    }
+    public IpPacketType getIpPacketType() {
+        return (IpPacketType) packetTypes[1];
     }
 }

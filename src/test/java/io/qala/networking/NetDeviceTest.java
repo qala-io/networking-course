@@ -8,7 +8,7 @@ import static org.junit.Assert.*;
 public class NetDeviceTest {
     @Test public void addsDeviceIpAddressToRoutingTables() {
         RoutingTables rtables = new RoutingTables();
-        PacketType[] packetTypes = PacketType.createAllPacketTypes(rtables);
+        PacketType[] packetTypes = PacketType.createAllPacketTypes(new ArpTable(), rtables);
 
         IpRange network = IpRange.randomAddressInRange();
         NetDevice dev = new NetDevice(new SpyNic(), packetTypes, rtables);

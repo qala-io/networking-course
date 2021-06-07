@@ -1,14 +1,19 @@
 package io.qala.networking.ipv4;
 
+import io.qala.networking.Bytes;
+import io.qala.networking.NetDevice;
 import io.qala.networking.TrafficStats;
 import io.qala.networking.l2.L2Packet;
+import io.qala.networking.l2.Mac;
 
 public class IpPacketType implements PacketType {
     private final RoutingTables rtables;
+    private final ArpTable arpTable;
     private final TrafficStats trafficStats = new TrafficStats();
 
-    public IpPacketType(RoutingTables rtables) {
+    public IpPacketType(ArpTable arpTable, RoutingTables rtables) {
         this.rtables = rtables;
+        this.arpTable = arpTable;
     }
 
     /**
@@ -28,6 +33,12 @@ public class IpPacketType implements PacketType {
         }
         rt = rtables.main().lookup(ip.dst());
         //need to forward the packet
+    }
+    public void send(IpAddress dst, Bytes body) {
+        Route route = rtables.main().lookup(dst);
+        NetDevice dev = route.getDev();
+        Mac neighbor = arpTable.getNeighbor(dst, dev);
+        dev.send(new IpPacket(dev.getMac(), dev.getIpAddress(), neighbor, dst, body).toL2());
     }
 
     @Override
