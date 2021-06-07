@@ -57,6 +57,9 @@ public class NetDevice {
     public Mac getMac() {
         return nic.getMac();
     }
+    public IpAddress getIpAddress() {// let's just return the 1st address available for simplicity
+        return ipAddresses.iterator().next().getAddress();
+    }
     public void addIpAddress(IpRange range) {
         // in reality we add more routes - not just directly for the IP address, but for the whole network
         rtables.local().add(new Route(new IpRange(range.getAddress(), 32), null, this, RouteType.LOCAL));

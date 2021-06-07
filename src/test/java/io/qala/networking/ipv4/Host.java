@@ -25,6 +25,9 @@ public class Host {
     }
 
     ArpTable getArpTable() {
-        return ((ArpPacketType) packetTypes[0]).getArpTable();
+        return (getArpPacketType()).getArpTable();
+    }
+    public ArpPacketType getArpPacketType() {
+        return (ArpPacketType) packetTypes[0];
     }
 }

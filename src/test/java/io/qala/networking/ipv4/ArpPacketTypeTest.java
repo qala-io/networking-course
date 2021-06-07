@@ -76,4 +76,14 @@ public class ArpPacketTypeTest {
         assertEquals(host1.net1.eth.getMac(), host2.getArpTable().get(host1.net1.ipAddress));
     }
 
+    @Test public void senderFillArpTableAfterReplyComesBack() {
+        Host host1 = new Host();
+        Host host2 = new Host();
+        new Cable(host1.net1.eth, host2.net1.eth);
+
+        Mac neighbor = host1.getArpPacketType().getNeighbor(host1.net1.dev, host2.net1.ipAddress);
+        assertEquals(host2.net1.eth.getMac(), neighbor);
+        assertEquals(host2.net1.eth.getMac(), host1.getArpTable().get(host2.net1.ipAddress));
+        assertEquals(host1.net1.eth.getMac(), host2.getArpTable().get(host1.net1.ipAddress));
+    }
 }

@@ -1,6 +1,8 @@
 package io.qala.networking.ipv4;
 
+import io.qala.networking.NetDevice;
 import io.qala.networking.l2.L2Packet;
+import io.qala.networking.l2.Mac;
 
 /**
  * <a href="https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/arp.c#L1288">arp_packet_type</a>
@@ -35,6 +37,14 @@ public class ArpPacketType implements PacketType {
             // arp_send_dst() https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/arp.c#L300
             // netfilter NF_ARP_OUT
             l2.getDev().send(arp.createReply(l2.getDev().getMac()).toL2());
+    }
+
+    public Mac getNeighbor(NetDevice dev, IpAddress dst) {
+        // does the ArpTable prepares the data for the request itself or the ArpRequestType?
+        return arpTable.getOrCompute(dst, () -> {
+            ArpPacket arpReq = ArpPacket.req(dev.getMac(), dev.getIpAddress(), Mac.BROADCAST, dst);
+            dev.send(arpReq.toL2());
+        });
     }
 
 
