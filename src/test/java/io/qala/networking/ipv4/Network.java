@@ -9,7 +9,7 @@ class Network {
     final EthNic eth;
     final NetDevice dev;
 
-    Network(RoutingTables rtables, PacketType[] packetTypes) {
+    Network(FibTableList rtables, PacketType[] packetTypes) {
         network = IpRange.random();
         ipAddress = network.randomAddr();
         eth = new EthNic();

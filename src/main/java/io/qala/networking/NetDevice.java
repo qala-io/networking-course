@@ -15,7 +15,7 @@ public class NetDevice {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetDevice.class);
     private final PacketType[] packetTypes;
     private final String name = "eth" + numeric(5);
-    private final RoutingTables rtables;
+    private final FibTableList rtables;
     private NetDevice master;
     private Nic2 nic;
     /**
@@ -24,7 +24,7 @@ public class NetDevice {
      */
     private final Set<IpRange> ipAddresses = new HashSet<>();
 
-    public NetDevice(Nic2 nic, PacketType[] packetTypes, RoutingTables rtables) {
+    public NetDevice(Nic2 nic, PacketType[] packetTypes, FibTableList rtables) {
         this.packetTypes = packetTypes;
         this.nic = nic;
         this.rtables = rtables;

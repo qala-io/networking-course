@@ -7,9 +7,9 @@ import io.qala.networking.l2.L2Packet;
  */
 public class ArpPacketType implements PacketType {
     private final ArpTable arpTable;
-    private final RoutingTables rtable;
+    private final FibTableList rtable;
 
-    public ArpPacketType(ArpTable arpTable, RoutingTables rtables) {
+    public ArpPacketType(ArpTable arpTable, FibTableList rtables) {
         this.arpTable = arpTable;
         this.rtable = rtables;
     }

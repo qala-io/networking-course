@@ -10,11 +10,11 @@ import org.slf4j.LoggerFactory;
 
 public class IpPacketType implements PacketType {
     private static final Logger LOGGER = LoggerFactory.getLogger(IpPacketType.class);
-    private final RoutingTables rtables;
+    private final FibTableList rtables;
     private final ArpTable arpTable;
     private final TrafficStats trafficStats = new TrafficStats();
 
-    public IpPacketType(ArpTable arpTable, RoutingTables rtables) {
+    public IpPacketType(ArpTable arpTable, FibTableList rtables) {
         this.rtables = rtables;
         this.arpTable = arpTable;
     }

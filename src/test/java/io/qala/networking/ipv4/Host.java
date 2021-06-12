@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Host {
-    private final RoutingTables rtables = new RoutingTables();
+    private final FibTableList rtables = new FibTableList();
     final Network net1;
     final List<Network> nets = new ArrayList<>();
     final PacketType[] packetTypes;
@@ -30,7 +30,7 @@ public class Host {
     public ArpTable getArpTable() {
         return (getArpPacketType()).getArpTable();
     }
-    public RoutingTables getRoutingTables() {
+    public FibTableList getRoutingTables() {
         return rtables;
     }
     public ArpPacketType getArpPacketType() {

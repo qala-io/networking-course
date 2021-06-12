@@ -6,10 +6,10 @@ import org.junit.Test;
 import static io.qala.datagen.RandomShortApi.callNoneOrMore;
 import static org.junit.Assert.*;
 
-public class RoutingTableTest {
+public class FibTableTest {
     @Test public void returnsDefaultRouteIfNoOtherRoutesExist() {
         NetDevice dev = dev();
-        RoutingTable routes = new RoutingTable();
+        FibTable routes = new FibTable();
         routes.addDefaultRoute(dev);
 
         Route route = routes.lookup(IpAddress.random());
@@ -18,7 +18,7 @@ public class RoutingTableTest {
     }
     @Test public void matchesExactlyIfRouteIsToHost() {
         NetDevice dev = dev();
-        RoutingTable routes = new RoutingTable();
+        FibTable routes = new FibTable();
         routes.addRoute(new IpRange("10.12.12.1/32"), null, dev);
 
         Route route = routes.lookup(new IpAddress("10.12.12.1"));
@@ -26,7 +26,7 @@ public class RoutingTableTest {
     }
     @Test public void matchesBySubnetIfRouteIsForRange() {
         NetDevice dev = dev();
-        RoutingTable routes = new RoutingTable();
+        FibTable routes = new FibTable();
         routes.addRoute(new IpRange("10.12.12.0/24"), null, dev);
 
         Route route = routes.lookup(new IpAddress("10.12.12.5"));
@@ -34,7 +34,7 @@ public class RoutingTableTest {
     }
     @Test public void ifMultipleRoutesMatch_chooseMostSpecific() {
         NetDevice dev = dev();
-        RoutingTable routes = new RoutingTable();
+        FibTable routes = new FibTable();
         routes.addRoute(new IpRange("10.12.12.0/24"), null, dev);
         routes.addRoute(new IpRange("10.12.12.128/25"), null, dev);
         routes.addRoute(new IpRange("10.12.0.0/16"), null, dev);
@@ -43,7 +43,7 @@ public class RoutingTableTest {
         assertEquals(new IpRange("10.12.12.128/25"), route.getDestination());
     }
     @Test public void nullIfNoRoutesMatch() {
-        RoutingTable routes = new RoutingTable();
+        FibTable routes = new FibTable();
         callNoneOrMore(
                 () -> routes.add(new Route(new IpRange("1.2.3.0/24"), null, dev(), RouteType.REMOTE)),
                 () -> routes.add(new Route(new IpRange("10.0.0.0/8"), null, dev(), RouteType.LOCAL))

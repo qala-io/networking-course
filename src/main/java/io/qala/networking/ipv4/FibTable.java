@@ -8,7 +8,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class RoutingTable {
+/**
+ * FIB = forwarding information base, it's basically a routing table for IP.
+ */
+public class FibTable {
     private static final IpRange DEFAULT_ROUTE = new IpRange("0.0.0.0/0");
     private final Map<IpRange, Route> rangeRoutes = new TreeMap<>(
             // The most specific route (with most bits in mask) should come first to have higher priority.
@@ -16,7 +19,7 @@ public class RoutingTable {
             Comparator.comparingInt(IpRange::getNetworkBitCount).reversed()
     );
     private final Map<IpAddress, Route> singleHostRoutes = new HashMap<>();
-    public RoutingTable() { }
+    public FibTable() { }
 
     public void add(Route route) {// see other methods for the right terminal commands of iproute2 package
         if(!route.getDestination().matches(route.getDestination().getAddress()))

@@ -3,7 +3,7 @@ package io.qala.networking.ipv4;
 import io.qala.networking.l2.L2Packet;
 
 public interface PacketType {
-    static PacketType[] createAllPacketTypes(ArpTable arpTable, RoutingTables rtables) {
+    static PacketType[] createAllPacketTypes(ArpTable arpTable, FibTableList rtables) {
         return new PacketType[] {new ArpPacketType(arpTable, rtables), new IpPacketType(arpTable, rtables)};
     }
     /**
