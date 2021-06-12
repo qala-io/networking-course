@@ -1,5 +1,7 @@
 package io.qala.networking.ipv4;
 
+import io.qala.networking.TrafficStats;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,9 +21,10 @@ public class Host {
             addNet();
         return this;
     }
-    public void addNet() {
+    public Network addNet() {
         Network net = new Network(rtables, packetTypes);
         nets.add(net);
+        return net;
     }
 
     public ArpTable getArpTable() {
@@ -35,5 +38,8 @@ public class Host {
     }
     public IpPacketType getIpPacketType() {
         return (IpPacketType) packetTypes[1];
+    }
+    public TrafficStats getIpStats() {
+        return getIpPacketType().getTrafficStats();
     }
 }

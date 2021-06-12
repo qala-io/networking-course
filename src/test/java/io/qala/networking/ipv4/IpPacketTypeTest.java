@@ -14,7 +14,15 @@ public class IpPacketTypeTest {
         new Cable(host1.net1.eth, host2.net1.eth);
         host1.getRoutingTables().main().addRoute(host2.net1.network, null, host1.net1.dev);
         host1.getIpPacketType().send(host2.net1.ipAddress, new Bytes(1, 2, 3));
-        assertEquals(host1.net1.ipAddress, host2.getIpPacketType().getTrafficStats().getReceivedPackets(host2.net1.dev).get(0).src());
+        assertEquals(host1.net1.ipAddress, host2.getIpStats().getReceivedPackets(host2.net1.dev).get(0).src());
+    }
+    @Test public void localDelivery_ifPacketDestinationIsLocal_noNeedToSendItOut() {
+        Host host1 = new Host();
+        Network net2 = host1.addNet();
+        host1.getIpPacketType().send(net2.ipAddress, new Bytes());
+        IpPacket receivedPacket = host1.getIpStats().getReceivedPackets(net2.dev).get(0);
+        assertEquals(host1.nets.get(1).ipAddress, receivedPacket.src());// don't know if this is right
+        assertEquals(host1.nets.get(1).ipAddress, receivedPacket.dst());
     }
 
 }

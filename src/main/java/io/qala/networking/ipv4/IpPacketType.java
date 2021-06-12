@@ -31,7 +31,7 @@ public class IpPacketType implements PacketType {
         IpPacket ip = new IpPacket(l2);
         Route rt = rtables.local().lookup(ip.dst());
         if(rt != null) {
-            trafficStats.receivedPacket(l2.getDev(), ip);
+            deliverLocally(l2.getDev(), ip);
             return;
         }
         rt = rtables.main().lookup(ip.dst());
@@ -40,18 +40,26 @@ public class IpPacketType implements PacketType {
     public void send(IpAddress dst, Bytes body) {
         LOGGER.info("Sending IP packet to {}", dst);
         Route route = rtables.local().lookup(dst);
-        if(route == null)
-            route = rtables.main().lookup(dst);
-        if(route == null)
+        if(route != null) {
+            NetDevice dev = route.getDev();
+            deliverLocally(dev, new IpPacket(dev.getMac(), dev.getIpAddress(), dev.getMac(), dst, body));
+            return;
+        }
+        route = rtables.main().lookup(dst);
+        if (route == null)
             throw RoutingException.networkUnreachable();
         NetDevice dev = route.getDev();
         Mac neighbor = arpTable.getNeighbor(dst, dev);
-        dev.send(new IpPacket(dev.getMac(), dev.getIpAddress(), neighbor, dst, body).toL2());
+        IpPacket ipPacket = new IpPacket(dev.getMac(), dev.getIpAddress(), neighbor, dst, body);
+        dev.send(ipPacket.toL2());
     }
 
     @Override
     public boolean matches(L2Packet l2) {
         return IpPacket.isIp(l2);
+    }
+    private void deliverLocally(NetDevice dev, IpPacket ipPacket) {
+        trafficStats.receivedPacket(dev, ipPacket);
     }
 
     public TrafficStats getTrafficStats() {

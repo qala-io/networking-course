@@ -45,8 +45,8 @@ public class RoutingTableTest {
     @Test public void nullIfNoRoutesMatch() {
         RoutingTable routes = new RoutingTable();
         callNoneOrMore(
-                () -> routes.add(new Route(new IpRange("1.2.3.4/24"), null, dev(), RouteType.REMOTE)),
-                () -> routes.add(new Route(new IpRange("10.30.50.120/8"), null, dev(), RouteType.LOCAL))
+                () -> routes.add(new Route(new IpRange("1.2.3.0/24"), null, dev(), RouteType.REMOTE)),
+                () -> routes.add(new Route(new IpRange("10.0.0.0/8"), null, dev(), RouteType.LOCAL))
         );
 
         assertNull(routes.lookup(new IpAddress("11.67.0.1")));
