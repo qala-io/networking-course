@@ -7,14 +7,13 @@ import io.qala.networking.l2.Mac;
 import java.util.HashSet;
 import java.util.Set;
 
-import static io.qala.datagen.RandomShortApi.numeric;
-
 public class NetDevice {
+    private static int counter = 0;
     private final PacketType[] packetTypes;
-    private final String name = "eth" + numeric(5);
+    private final String name = "eth" + counter++;
     private final FibTableList rtables;
+    private final Nic2 nic;
     private NetDevice master;
-    private Nic2 nic;
     /**
      * This is actually part of internet device, not just device.
      * <a href="https://elixir.bootlin.com/linux/v5.12.1/source/include/linux/inetdevice.h#L29">in_device->in_ifaddr</a>
@@ -68,9 +67,6 @@ public class NetDevice {
     public void setMaster(NetDevice master) {
         Loggers.TERMINAL_COMMANDS.info("ip link set dev {} master {}", name, master);
         this.master = master;
-    }
-    public void setNic(Nic2 nic) {
-        this.nic = nic;
     }
 
     @Override

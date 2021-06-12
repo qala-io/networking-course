@@ -13,13 +13,17 @@ import java.util.TreeMap;
  */
 public class FibTable {
     private static final IpRange DEFAULT_ROUTE = new IpRange("0.0.0.0/0");
+    private final RouteType routeType;
     private final Map<IpRange, Route> rangeRoutes = new TreeMap<>(
             // The most specific route (with most bits in mask) should come first to have higher priority.
             // In real Kernel though there are more rules to resolve ties
-            Comparator.comparingInt(IpRange::getNetworkBitCount).reversed()
+            Comparator.comparingInt(IpRange::getNetworkBitCount)
+                    .thenComparing((r) -> r.getAddress().asInt()).reversed()
     );
     private final Map<IpAddress, Route> singleHostRoutes = new HashMap<>();
-    public FibTable() { }
+    public FibTable(RouteType routeType) {
+        this.routeType = routeType;
+    }
 
     public void add(Route route) {// see other methods for the right terminal commands of iproute2 package
         if(!route.getDestination().matches(route.getDestination().getAddress()))
@@ -34,15 +38,15 @@ public class FibTable {
 
     public void addDefaultRoute(NetDevice dev) {
         Loggers.TERMINAL_COMMANDS.info("ip route add default dev {}", dev);
-        add(new Route(DEFAULT_ROUTE, null, dev, RouteType.LOCAL));
+        add(new Route(DEFAULT_ROUTE, null, dev, routeType));
     }
     public void addDefaultRoute(IpAddress gateway, NetDevice dev) {
         Loggers.TERMINAL_COMMANDS.info("ip route add default via {} dev {}", gateway, dev);
-        add(new Route(DEFAULT_ROUTE, gateway, dev, RouteType.REMOTE/*??*/));
+        add(new Route(DEFAULT_ROUTE, gateway, dev, routeType));
     }
     public void addRoute(IpRange destination, IpAddress gateway, NetDevice dev) {
         Loggers.TERMINAL_COMMANDS.info("ip route add {} via {} dev {}", destination, gateway, dev);
-        add(new Route(destination, gateway, dev, RouteType.REMOTE/*??*/));
+        add(new Route(destination, gateway, dev, routeType));
     }
     /**
      * Real route lookup is more sophisticated:

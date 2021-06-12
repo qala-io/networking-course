@@ -11,6 +11,7 @@ public class ArpPacketType implements PacketType {
     private static final Logger LOGGER = LoggerFactory.getLogger(ArpPacketType.class);
     private final ArpTable arpTable;
     private final FibTableList rtable;
+    private boolean ipForward;
 
     public ArpPacketType(ArpTable arpTable, FibTableList rtables) {
         this.arpTable = arpTable;
@@ -29,13 +30,18 @@ public class ArpPacketType implements PacketType {
         // remote route: https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/arp.c#L838
         Route rt = rtable.local().lookup(arp.dstIp());//https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/arp.c#L818
         if(rt == null)
+            rt = rtable.main().lookup(arp.dstIp());
+        if(rt == null)
             return;
         arpTable.put(arp.srcIp(), arp.srcMac());
         //netfilter NF_ARP_IN
         if(arp.isReq()) // https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/arp.c#L800
+            if(rt.isLocal())
             // arp_send_dst() https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/arp.c#L300
             // netfilter NF_ARP_OUT
-            l2.getDev().send(arp.createReply(l2.getDev().getMac()).toL2());
+                l2.getDev().send(arp.createReply(l2.getDev().getMac()).toL2());
+            else if(ipForward)
+                rt.getDev().send(arp.toL2());
     }
 
     @Override
@@ -45,5 +51,8 @@ public class ArpPacketType implements PacketType {
 
     public ArpTable getArpTable() {
         return arpTable;
+    }
+    public void enableIpForward() {
+        ipForward = true;
     }
 }

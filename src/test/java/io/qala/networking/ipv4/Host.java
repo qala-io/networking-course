@@ -1,5 +1,6 @@
 package io.qala.networking.ipv4;
 
+import io.qala.networking.Loggers;
 import io.qala.networking.TrafficStats;
 
 import java.util.ArrayList;
@@ -41,5 +42,10 @@ public class Host {
     }
     public TrafficStats getIpStats() {
         return getIpPacketType().getTrafficStats();
+    }
+    public void enableIpForward() {
+        Loggers.TERMINAL_COMMANDS.info("echo 1 > /proc/sys/net/ipv4/ip_forward");
+        getArpPacketType().enableIpForward();
+        getIpPacketType().enableIpForward();
     }
 }

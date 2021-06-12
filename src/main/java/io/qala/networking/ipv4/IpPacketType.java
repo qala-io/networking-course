@@ -13,6 +13,7 @@ public class IpPacketType implements PacketType {
     private final FibTableList rtables;
     private final ArpTable arpTable;
     private final TrafficStats trafficStats = new TrafficStats();
+    private boolean ipForward;
 
     public IpPacketType(ArpTable arpTable, FibTableList rtables) {
         this.rtables = rtables;
@@ -30,30 +31,25 @@ public class IpPacketType implements PacketType {
             return;
         IpPacket ip = new IpPacket(l2);
         LOGGER.info(l2.getDev() + " received IP from " + ip.src());
-        Route rt = rtables.local().lookup(ip.dst());
-        if(rt != null) {
-            ipLocalDeliver(l2.getDev(), ip);
+        Route rt = rtables.lookup(ip.dst());
+        if(rt == null)
             return;
-        }
-        rt = rtables.main().lookup(ip.dst());
-        //need to forward the packet
+        if(rt.isLocal())
+            ipLocalDeliver(l2.getDev(), ip);
+        else if(ipForward)
+            ipForward(rt, ip);
     }
     public void send(IpAddress dst, Bytes body) {
         LOGGER.info("Sending IP packet to {}", dst);
-        Route route = rtables.local().lookup(dst);
-        if(route != null) {
-            NetDevice dev = route.getDev();
-            ipLocalDeliver(dev, new IpPacket(dev.getMac(), dev.getIpAddress(), dev.getMac(), dst, body));
-            return;
-        }
-        route = rtables.main().lookup(dst);
-        if (route == null)
+        Route rt = rtables.lookup(dst);
+        if(rt == null)
             throw RoutingException.networkUnreachable();
-        NetDevice dev = route.getDev();
-        IpAddress nextHop = route.getNextHopFor(dst);
-        Mac neighbor = arpTable.getNeighbor(nextHop, dev);
-        IpPacket ipPacket = new IpPacket(dev.getMac(), dev.getIpAddress(), neighbor, dst, body);
-        dev.send(ipPacket.toL2());
+        if(rt.isLocal()) {
+            NetDevice dev = rt.getDev();
+            ipLocalDeliver(dev, new IpPacket(dev.getMac(), dev.getIpAddress(), dev.getMac(), dst, body));
+        } else {
+            ipSendRemotely(dst, rt, body);
+        }
     }
 
     @Override
@@ -77,12 +73,25 @@ public class IpPacketType implements PacketType {
         // ip_protocol_deliver_rcu(): https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/ip_input.c#L187
         // ipprot->handler() which is dccp_v4_rcv(): https://elixir.bootlin.com/linux/v5.12.1/source/net/dccp/ipv4.c#L774
     }
-    private void ipForward() {
-        ipForwardFinish();
+    private void ipForward(Route rt, IpPacket ip) {
+        ipForwardFinish(rt, ip);
     }
-    private void ipForwardFinish() { }
+    private void ipForwardFinish(Route rt, IpPacket ip) {
+        trafficStats.forwardPacket(rt.getDev(), ip);
+        ipSendRemotely(ip.dst(), rt, ip.getPayload());
+    }
 
+    private void ipSendRemotely(IpAddress dst, Route route, Bytes body) {
+        NetDevice dev = route.getDev();
+        IpAddress nextHop = route.getNextHopFor(dst);
+        Mac neighbor = arpTable.getNeighbor(nextHop, dev);
+        IpPacket ipPacket = new IpPacket(dev.getMac(), dev.getIpAddress(), neighbor, dst, body);
+        dev.send(ipPacket.toL2());
+    }
     public TrafficStats getTrafficStats() {
         return trafficStats;
+    }
+    public void enableIpForward() {
+        this.ipForward = true;
     }
 }

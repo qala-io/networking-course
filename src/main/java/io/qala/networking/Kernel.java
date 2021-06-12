@@ -3,9 +3,10 @@ package io.qala.networking;
 import io.qala.networking.ipv4.IpAddress;
 import io.qala.networking.ipv4.Route;
 import io.qala.networking.ipv4.FibTable;
+import io.qala.networking.ipv4.RouteType;
 
 public class Kernel {
-    private final FibTable routes = new FibTable();
+    private final FibTable routes = new FibTable(RouteType.LOCAL);
     public void send(IpAddress dstIp, Bytes payload) {
         Route route = routes.lookup(dstIp);
         NetDevice nic = route.getDev();

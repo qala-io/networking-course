@@ -2,6 +2,7 @@ package io.qala.networking.ipv4;
 
 import io.qala.networking.Bytes;
 import io.qala.networking.l1.Cable;
+import io.qala.networking.l2.Mac;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -13,7 +14,7 @@ public class IpPacketTypeTest {
         Host host2 = new Host();
         new Cable(host1.net1.eth, host2.net1.eth);
         host1.getRoutingTables().main().addRoute(host2.net1.network, null, host1.net1.dev);
-        host1.getIpPacketType().send(host2.net1.ipAddress, new Bytes(1, 2, 3));
+        host1.getIpPacketType().send(host2.net1.ipAddress, new Bytes(1));
         assertEquals(host1.net1.ipAddress, host2.getIpStats().getReceivedPackets(host2.net1.dev).get(0).src());
     }
     @Test public void localDelivery_ifPacketDestinationIsLocal_noNeedToSendItOut() {
@@ -39,6 +40,32 @@ public class IpPacketTypeTest {
         // we'll be sending the request to that MAC
         assertEquals(host2.net1.eth.getMac(), deliveredPacket.dstMac());
         assertEquals(deliveredPacket.dstMac(), host1.getArpTable().getFromCache(host2net2.ipAddress, host1.net1.dev));
+    }
+    @Test public void packetIsDroppedIfForwardingIsRequiredButItIsTurnedOff() {
+        Host host = new Host();
+        Network externalNetwork = new Host().net1;
+        host.getRoutingTables().main().addRoute(externalNetwork.network, null, host.net1.dev);
+
+        host.net1.eth.receive(new IpPacket(
+                Mac.random(), IpAddress.random(),
+                host.net1.dev.getMac(), externalNetwork.ipAddress,
+                new Bytes()).toL2().toBytes());
+        assertEquals(0, host.getIpStats().getReceivedCount());
+    }
+    @Test public void forwardsPackets_ifTheirDestinationIsRemote() {
+        Host host1 = new Host();
+        Network host1net2 = host1.addNet();
+        host1.enableIpForward();
+        Host host2 = new Host();
+        host1.getRoutingTables().main().addRoute(host2.net1.network, null, host1net2.dev);
+        new Cable(host1net2.eth, host2.net1.eth);
+
+        host1.net1.eth.receive(new IpPacket(
+                Mac.random(), IpAddress.random(),
+                host1.net1.dev.getMac(), host2.net1.ipAddress,
+                new Bytes()).toL2().toBytes());
+        assertEquals(1, host1.getIpStats().getForwardedPackets(host1net2.dev).size());
+        assertEquals(1, host2.getIpStats().getReceivedPackets(host2.net1.dev).size());
     }
 
 }
