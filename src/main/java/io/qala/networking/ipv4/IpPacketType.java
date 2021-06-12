@@ -31,7 +31,7 @@ public class IpPacketType implements PacketType {
         IpPacket ip = new IpPacket(l2);
         Route rt = rtables.local().lookup(ip.dst());
         if(rt != null) {
-            deliverLocally(l2.getDev(), ip);
+            ipLocalDeliver(l2.getDev(), ip);
             return;
         }
         rt = rtables.main().lookup(ip.dst());
@@ -42,7 +42,7 @@ public class IpPacketType implements PacketType {
         Route route = rtables.local().lookup(dst);
         if(route != null) {
             NetDevice dev = route.getDev();
-            deliverLocally(dev, new IpPacket(dev.getMac(), dev.getIpAddress(), dev.getMac(), dst, body));
+            ipLocalDeliver(dev, new IpPacket(dev.getMac(), dev.getIpAddress(), dev.getMac(), dst, body));
             return;
         }
         route = rtables.main().lookup(dst);
@@ -58,9 +58,27 @@ public class IpPacketType implements PacketType {
     public boolean matches(L2Packet l2) {
         return IpPacket.isIp(l2);
     }
-    private void deliverLocally(NetDevice dev, IpPacket ipPacket) {
-        trafficStats.receivedPacket(dev, ipPacket);
+
+    /**
+     * <a href="https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/ip_input.c#L240">ip_local_deliver()</a>
+     */
+    private void ipLocalDeliver(NetDevice dev, IpPacket ipPacket) {
+        // invoke net filter
+        ipLocalDeliverFinish(dev, ipPacket);
     }
+    /**
+     * <a href="https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/ip_input.c#L226">ip_local_deliver_finish()</a>
+     */
+    private void ipLocalDeliverFinish(NetDevice dev, IpPacket ipPacket) {
+        trafficStats.receivedPacket(dev, ipPacket);
+        // subsequent call stack:
+        // ip_protocol_deliver_rcu(): https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/ip_input.c#L187
+        // ipprot->handler() which is dccp_v4_rcv(): https://elixir.bootlin.com/linux/v5.12.1/source/net/dccp/ipv4.c#L774
+    }
+    private void ipForward() {
+        ipForwardFinish();
+    }
+    private void ipForwardFinish() { }
 
     public TrafficStats getTrafficStats() {
         return trafficStats;
