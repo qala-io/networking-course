@@ -17,16 +17,19 @@ public class ArpTable {
         dynamicIps.put(ip, mac);
     }
     public Mac getNeighbor(IpAddress dst, NetDevice dev) {
-        Mac mac = dynamicIps.get(dst);
+        Mac mac = getFromCache(dst, dev);
         if(mac == null) {
             // does the ArpTable prepares the data for the request itself or the ArpRequestType?
             // in real life this is async and OS has to wait until ARP table is updated
             ArpPacket arpReq = ArpPacket.req(dev.getMac(), dev.getIpAddress(), Mac.BROADCAST, dst);
             dev.send(arpReq.toL2());
-            mac = dynamicIps.get(dst);
+            mac = getFromCache(dst, dev);
         }
         if(mac == null)
             throw new RuntimeException("Couldn't get MAC address for IP " + dst);
         return mac;
+    }
+    public Mac getFromCache(IpAddress dst, NetDevice dev) {
+        return dynamicIps.get(dst);
     }
 }

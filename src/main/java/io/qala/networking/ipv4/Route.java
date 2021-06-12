@@ -43,6 +43,8 @@ public class Route {
             throw new IllegalArgumentException(ip + " doesn't match destination " + destination);
         if(isLocal())
             return ip;
+        if(nextHop == null)
+            return ip;
         return nextHop;
     }
 }

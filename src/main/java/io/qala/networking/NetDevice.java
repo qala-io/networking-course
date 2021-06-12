@@ -3,8 +3,6 @@ package io.qala.networking;
 import io.qala.networking.ipv4.*;
 import io.qala.networking.l2.L2Packet;
 import io.qala.networking.l2.Mac;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,7 +10,6 @@ import java.util.Set;
 import static io.qala.datagen.RandomShortApi.numeric;
 
 public class NetDevice {
-    private static final Logger LOGGER = LoggerFactory.getLogger(NetDevice.class);
     private final PacketType[] packetTypes;
     private final String name = "eth" + numeric(5);
     private final FibTableList rtables;
@@ -40,7 +37,6 @@ public class NetDevice {
             master.receive(l2);
             return;
         }
-        LOGGER.info(this + " received IP packet from " + l2.src());
         LogPadding.pad();
         for (PacketType packetType : packetTypes) {
             if(packetType.matches(l2)) {

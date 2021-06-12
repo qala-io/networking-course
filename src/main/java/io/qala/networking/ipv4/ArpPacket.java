@@ -36,7 +36,7 @@ public class ArpPacket {
         this.dstIp = new IpAddress(l2Packet.getPayload().get(offset+=MAC_BYTES, offset+IPV4_BYTES));
     }
     public static ArpPacket req(Mac src, IpAddress srcIp, Mac dst, IpAddress dstIp) {
-        return new ArpPacket(Type.REQUEST, src, dst, srcIp, dstIp);
+        return new ArpPacket(Type.ARP_REQ, src, dst, srcIp, dstIp);
     }
     public Mac srcMac() {
         return src;
@@ -58,10 +58,13 @@ public class ArpPacket {
         return l2Packet.getPayload().startsWith(PACKET_HEADER);
     }
     public boolean isReply() {
-        return type == Type.REPLY;
+        return type == Type.ARP_REPLY;
     }
     public boolean isReq() {
-        return type == Type.REQUEST;
+        return type == Type.ARP_REQ;
+    }
+    public Type getType() {
+        return type;
     }
 
     private Bytes toL2Payload() {
@@ -74,11 +77,11 @@ public class ArpPacket {
     public ArpPacket createReply(Mac src) {
         if(!isReq())
             throw new IllegalStateException("This wasn't a request in the first place");
-        return new ArpPacket(Type.REPLY, src, this.src, this.dstIp, this.srcIp);
+        return new ArpPacket(Type.ARP_REPLY, src, this.src, this.dstIp, this.srcIp);
     }
 
     public enum Type {
-        REQUEST(1), REPLY(2);
+        ARP_REQ(1), ARP_REPLY(2);
         private final byte operationCode;
 
         Type(int operationCode) {

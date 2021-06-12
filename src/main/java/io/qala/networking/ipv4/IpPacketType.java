@@ -29,6 +29,7 @@ public class IpPacketType implements PacketType {
             // the master how the packet should be processed
             return;
         IpPacket ip = new IpPacket(l2);
+        LOGGER.info(l2.getDev() + " received IP from " + ip.src());
         Route rt = rtables.local().lookup(ip.dst());
         if(rt != null) {
             ipLocalDeliver(l2.getDev(), ip);
@@ -49,7 +50,8 @@ public class IpPacketType implements PacketType {
         if (route == null)
             throw RoutingException.networkUnreachable();
         NetDevice dev = route.getDev();
-        Mac neighbor = arpTable.getNeighbor(dst, dev);
+        IpAddress nextHop = route.getNextHopFor(dst);
+        Mac neighbor = arpTable.getNeighbor(nextHop, dev);
         IpPacket ipPacket = new IpPacket(dev.getMac(), dev.getIpAddress(), neighbor, dst, body);
         dev.send(ipPacket.toL2());
     }

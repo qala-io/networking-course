@@ -24,5 +24,21 @@ public class IpPacketTypeTest {
         assertEquals(host1.nets.get(1).ipAddress, receivedPacket.src());// don't know if this is right
         assertEquals(host1.nets.get(1).ipAddress, receivedPacket.dst());
     }
+    @Test public void sendsPacketToGatewayIfRouteHasIt() {
+        Host host1 = new Host();
+        Host host2 = new Host();
+        Network host2net2 = host2.addNet();
+        new Cable(host1.net1.eth, host2.net1.eth);
+        host1.getRoutingTables().main().addRoute(host2.net1.network, host2net2.ipAddress, host1.net1.dev);
+
+        host1.getIpPacketType().send(host2.net1.ipAddress, new Bytes());
+        IpPacket deliveredPacket = host2.getIpStats().getReceivedPackets(host2.net1.dev).get(0);
+        assertEquals(host1.net1.ipAddress, deliveredPacket.src());
+        assertEquals(host2.net1.ipAddress, deliveredPacket.dst());
+        // even though the IP address is for host2.net2, it's host2.net1 that will receive the ARP and thus
+        // we'll be sending the request to that MAC
+        assertEquals(host2.net1.eth.getMac(), deliveredPacket.dstMac());
+        assertEquals(deliveredPacket.dstMac(), host1.getArpTable().getFromCache(host2net2.ipAddress, host1.net1.dev));
+    }
 
 }

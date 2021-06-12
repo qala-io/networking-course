@@ -1,11 +1,14 @@
 package io.qala.networking.ipv4;
 
 import io.qala.networking.l2.L2Packet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <a href="https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/arp.c#L1288">arp_packet_type</a>
  */
 public class ArpPacketType implements PacketType {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArpPacketType.class);
     private final ArpTable arpTable;
     private final FibTableList rtable;
 
@@ -20,6 +23,7 @@ public class ArpPacketType implements PacketType {
     @Override
     public void rcv(L2Packet l2) {
         ArpPacket arp = new ArpPacket(l2);
+        LOGGER.info(l2.getDev() + " received " + arp.getType() + " from " + l2.src());
         // we'll accept ARP in either case:
         // local route: https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/arp.c#L821
         // remote route: https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/arp.c#L838
