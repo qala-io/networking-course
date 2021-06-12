@@ -19,6 +19,10 @@ public class RoutingTable {
     public RoutingTable() { }
 
     public void add(Route route) {// see other methods for the right terminal commands of iproute2 package
+        if(!route.getDestination().matches(route.getDestination().getAddress()))
+            throw new RoutingException("Route destination address doesn't match its own IP Address." +
+                                       " Does network address match network prefix? Maybe too many " +
+                                       "network bits are specified?", 0);
         if(route.getDestination().getNetworkBitCount() == 32)
             singleHostRoutes.put(route.getDestination().getAddress(), route);
         else
@@ -35,7 +39,7 @@ public class RoutingTable {
     }
     public void addRoute(IpRange destination, IpAddress gateway, NetDevice dev) {
         Loggers.TERMINAL_COMMANDS.info("ip route add {} via {} dev {}", destination, gateway, dev);
-        rangeRoutes.put(destination, new Route(destination, gateway, dev, RouteType.REMOTE/*??*/));
+        add(new Route(destination, gateway, dev, RouteType.REMOTE/*??*/));
     }
     /**
      * Real route lookup is more sophisticated:

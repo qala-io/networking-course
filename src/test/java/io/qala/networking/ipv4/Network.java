@@ -10,10 +10,10 @@ class Network {
     final NetDevice dev;
 
     Network(RoutingTables rtables, PacketType[] packetTypes) {
-        network = IpRange.randomAddressInRange();
-        ipAddress = network.getAddress();
+        network = IpRange.random();
+        ipAddress = network.randomAddr();
         eth = new EthNic();
         dev = new NetDevice(eth, packetTypes, rtables);
-        dev.addIpAddress(network);
+        dev.addIpAddress(new IpRange(ipAddress, network.getNetworkBitCount()));
     }
 }

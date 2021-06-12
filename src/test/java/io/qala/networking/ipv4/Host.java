@@ -24,8 +24,11 @@ public class Host {
         nets.add(net);
     }
 
-    ArpTable getArpTable() {
+    public ArpTable getArpTable() {
         return (getArpPacketType()).getArpTable();
+    }
+    public RoutingTables getRoutingTables() {
+        return rtables;
     }
     public ArpPacketType getArpPacketType() {
         return (ArpPacketType) packetTypes[0];

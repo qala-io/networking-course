@@ -5,8 +5,11 @@ import io.qala.networking.NetDevice;
 import io.qala.networking.TrafficStats;
 import io.qala.networking.l2.L2Packet;
 import io.qala.networking.l2.Mac;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IpPacketType implements PacketType {
+    private static final Logger LOGGER = LoggerFactory.getLogger(IpPacketType.class);
     private final RoutingTables rtables;
     private final ArpTable arpTable;
     private final TrafficStats trafficStats = new TrafficStats();
@@ -35,7 +38,12 @@ public class IpPacketType implements PacketType {
         //need to forward the packet
     }
     public void send(IpAddress dst, Bytes body) {
-        Route route = rtables.main().lookup(dst);
+        LOGGER.info("Sending IP packet to {}", dst);
+        Route route = rtables.local().lookup(dst);
+        if(route == null)
+            route = rtables.main().lookup(dst);
+        if(route == null)
+            throw RoutingException.networkUnreachable();
         NetDevice dev = route.getDev();
         Mac neighbor = arpTable.getNeighbor(dst, dev);
         dev.send(new IpPacket(dev.getMac(), dev.getIpAddress(), neighbor, dst, body).toL2());
@@ -46,8 +54,7 @@ public class IpPacketType implements PacketType {
         return IpPacket.isIp(l2);
     }
 
-    /*
-        App -(dst IP)-> Socket -> Kernel rtable -(src ip)-> Nic
-         */
-    public void sendArp() { }
+    public TrafficStats getTrafficStats() {
+        return trafficStats;
+    }
 }
