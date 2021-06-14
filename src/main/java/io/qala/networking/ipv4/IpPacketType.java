@@ -68,7 +68,7 @@ public class IpPacketType implements PacketType {
      * <a href="https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/ip_input.c#L226">ip_local_deliver_finish()</a>
      */
     private void ipLocalDeliverFinish(NetDevice dev, IpPacket ipPacket) {
-        trafficStats.receivedPacket(dev, ipPacket);
+        trafficStats.receivedPacket(dev, ipPacket.toL2());
         // subsequent call stack:
         // ip_protocol_deliver_rcu(): https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/ip_input.c#L187
         // ipprot->handler() which is dccp_v4_rcv(): https://elixir.bootlin.com/linux/v5.12.1/source/net/dccp/ipv4.c#L774
@@ -77,7 +77,7 @@ public class IpPacketType implements PacketType {
         ipForwardFinish(rt, ip);
     }
     private void ipForwardFinish(Route rt, IpPacket ip) {
-        trafficStats.forwardPacket(rt.getDev(), ip);
+        trafficStats.forwardPacket(rt.getDev(), ip.toL2());
         ipSendRemotely(ip.dst(), rt, ip.getPayload());
     }
 

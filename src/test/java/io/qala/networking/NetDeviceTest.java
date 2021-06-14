@@ -8,10 +8,9 @@ import static org.junit.Assert.*;
 public class NetDeviceTest {
     @Test public void addsDeviceIpAddressToRoutingTables() {
         FibTableList rtables = new FibTableList();
-        PacketType[] packetTypes = PacketType.createAllPacketTypes(new ArpTable(), rtables);
 
         IpRange network = IpRange.randomAddressInRange();
-        NetDevice dev = new NetDevice(new SpyNic(), packetTypes, rtables);
+        NetDevice dev = new NetDevice(new SpyNic(), rtables);
         dev.addIpAddress(network);
 
         Route local = rtables.local().lookup(network.getAddress());

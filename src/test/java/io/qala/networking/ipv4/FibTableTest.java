@@ -54,6 +54,6 @@ public class FibTableTest {
 
     private static NetDevice dev() {
         Host host = new Host();
-        return host.net1.dev;
+        return host.dev1.dev;
     }
 }

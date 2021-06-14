@@ -1,70 +1,87 @@
 package io.qala.networking.l2;
 
 import io.qala.networking.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.qala.datagen.RandomShortApi.numeric;
-
 /**
  * Either a software bridge or a hardware switch - they do the same thing.
  * Watch <a href="https://www.youtube.com/watch?v=rYodcvhh7b8">this video</a>.
+ *
+ * Also see <a href="https://www.programmersought.com/article/5995656527/">an awesome article that describe Kernel code</a>
  */
-public class Bridge implements Link<L2Packet>, Router<L2Packet> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Bridge.class);
+public class Bridge {
+    private static int count;
+    /** Bridge's own device. */
+    private final NetDevice brdev;
+    private final NetDeviceLogic netDeviceLogic;
+    private final Map<Mac, NetDevice> macToDev = new HashMap<>();
     /**
-     * To list NICs who use the bridge: {@code ip link show master <bridge name>}
+     * We don't introduce a class {@code Port} to keep things simple, it's easier to reference device directly.
      */
-    private final Map<Port, Nic> nics = new HashMap<>();
-    private final Map<Link<L2Packet>, Port> ports = new HashMap<>();
-    private final Map<Mac, Port> routing = new HashMap<>();
-    private final String name = "br" + numeric(5);
+    private final Map<NetDevice, Mac> ports = new HashMap<>();
 
-    public Bridge(Nic ... nics) {
-        Loggers.TERMINAL_COMMANDS.info("ip link add name {} type bridge", name);
-        Loggers.TERMINAL_COMMANDS.info("ip link set dev {} up", name);
-        for (Nic nic : nics) {
-            Port port = new Port(this.nics.size());
-            this.nics.put(port, nic);
-            ports.put(nic, port);
-            nic.setEndpoint(this);
-        }
+    public Bridge(NetDeviceLogic netDeviceLogic) {
+        this.netDeviceLogic = netDeviceLogic;
+        this.brdev = new NetDevice("br" + count++);
+        this.brdev.rxHandlerRegister(new RxHandler.NoOpRxHandler());
+    }
+    public void addInterface(NetDevice dev) {
+        rxHandlerRegister(dev);//https://elixir.bootlin.com/linux/v5.12.1/source/net/bridge/br_if.c#L636
+        macToDev.put(dev.getMac(), dev);
+        if(ports.containsKey(dev))
+            throw new RuntimeException("" + (-ErrNumbers.EBUSY.code));
+        ports.put(dev, dev.getMac());
+    }
+
+    /**
+     * <a href="https://elixir.bootlin.com/linux/v5.12.1/source/net/bridge/br_input.c#L33">br_pass_frame_up</a>
+     */
+    public void handleFrameFinish(L2Packet l2) {
+        macToDev.put(l2.src(), l2.getDev());
+        ports.put(l2.getDev(), l2.src());
+        NetDevice dev = macToDev.get(l2.dst());
+        if(dev != null)
+            passFrameUp(l2);
+        else
+            // if no such entry in existing ARP table, start "flooding"
+            // broadcast won't be in the table either, so no need to do an explicit check - it'll get here anyway
+            flood(l2);
+    }
+    private void passFrameUp(L2Packet l2) {
+        // If we didn't change the device, it would invoke netdev logic again, which would again check
+        // for rx_hanlder and that would call this bridge again, so we'd go in circles. By changing
+        // the device though the rx_handler will be empty and thus the packet would be processed directly
+        // in NetDevice w/o calling the bridge.
+        l2.setDev(brdev);//https://elixir.bootlin.com/linux/v5.12.1/source/net/bridge/br_input.c#L53
+        //NF_HOOK(NFPROTO_BRIDGE, NF_BR_LOCAL_IN,
+        //		       dev_net(indev), NULL, skb, indev, NULL,
+        //		       br_netif_receive_skb)
+        netDeviceLogic.receive(l2);
+    }
+    //https://elixir.bootlin.com/linux/v5.12.1/source/net/bridge/br_input.c#L168
+    private void flood(L2Packet l2) {
+        for (NetDevice nextDev : ports.keySet())
+            if (nextDev != l2.getDev())
+                passFrameUp(l2);// it doesn't actually call pass frame up when flooding, but for our purposes it's close enough
+    }
+
+    /**
+     * <a href="https://elixir.bootlin.com/linux/v5.12.1/source/net/core/dev.c#L5097">netdev_rx_handler_register()</a>
+     */
+    private void rxHandlerRegister(NetDevice dev) {
+        Loggers.TERMINAL_COMMANDS.info("ip link set dev {} master {}", dev, this.brdev);
+        dev.rxHandlerRegister(getHandler());
     }
     /**
-     * @param src unfortunately in code our NIC doesn't know which port it's attached
-     *            to and thus we have to pass the src NIC explicitly (for now)
+     * <a href="https://elixir.bootlin.com/linux/v5.12.1/source/net/bridge/br_input.c#L387">br_get_rx_handler()</a>
      */
-    public void route(Link<L2Packet> src, L2Packet packet) {
-        Port srcPort = ports.get(src);
-        routing.put(packet.src(), srcPort);
-        Port dstPort = routing.get(packet.dst());
-        if(dstPort != null) {
-            send(dstPort, packet);
-            return;
-        }
-        // if no such entry in existing ARP table, start "flooding"
-        // broadcast won't be in the table either, so no need to do an explicit check - it'll get here anyway
-        for (Port next : ports.values())
-            if (!next.equals(srcPort))
-                send(next, packet);
-
-    }
-    public void receive(Link<L2Packet> src, L2Packet packet) {
-        route(src, packet);
+    private RxHandler getHandler() {
+        return new CallBridgeRxHandler(this);
     }
 
-    public void attachWire(Port port, Nic endpoint) {
-        nics.put(port, endpoint);
-        ports.put(endpoint, port);
-    }
-    private void send(Port port, L2Packet packet) {
-        LOGGER.trace("Sending L2 packet for {} to port {}", packet.dst(), port);
-        nics.get(port).receive(this, packet);
-    }
     @Override public String toString() {
-        return name;
+        return this.brdev.toString();
     }
 }

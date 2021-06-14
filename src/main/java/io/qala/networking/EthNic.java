@@ -7,14 +7,16 @@ import io.qala.networking.l2.Mac;
 public class EthNic implements Nic2 {
     private final Mac mac;
     private NetDevice dev;
+    private final NetDeviceLogic devLogic;
     private boolean promiscuous;
     private Cable cable;
 
-    public EthNic() {
-        this(Mac.random());
+    public EthNic(NetDeviceLogic devLogic) {
+        this(Mac.random(), devLogic);
     }
-    public EthNic(Mac mac) {
+    public EthNic(Mac mac, NetDeviceLogic devLogic) {
         this.mac = mac;
+        this.devLogic = devLogic;
     }
     /**
      * P.13 https://www.cs.dartmouth.edu/~sergey/netreads/path-of-packet/Network_stack.pdf
@@ -31,7 +33,7 @@ public class EthNic implements Nic2 {
         L2Packet l2 = new L2Packet(l2Bytes, dev);
         l2.setToUs(l2.dst().equals(mac));
         if(l2.isToUs() || l2.dst().isBroadcast() || promiscuous)
-            dev.receive(l2);
+            devLogic.receive(l2);
     }
     public void send(L2Packet l2) {
         cable.send(this, l2.toBytes());

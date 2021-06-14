@@ -1,31 +1,38 @@
 package io.qala.networking.ipv4;
 
 import io.qala.networking.Loggers;
+import io.qala.networking.NetDeviceLogic;
 import io.qala.networking.TrafficStats;
+import io.qala.networking.l2.Bridge;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Host {
     private final FibTableList rtables = new FibTableList();
-    final Network net1;
-    final List<Network> nets = new ArrayList<>();
-    final PacketType[] packetTypes;
+    public final NetDevObjects dev1;
+    public final List<NetDevObjects> devs = new ArrayList<>();
+    public final PacketType[] packetTypes;
+    private final NetDeviceLogic netDeviceLogic;
 
     public Host() {
         packetTypes = PacketType.createAllPacketTypes(new ArpTable(), rtables);
-        net1 = new Network(rtables, packetTypes);
-        nets.add(net1);
+        netDeviceLogic = new NetDeviceLogic(packetTypes);
+        dev1 = new NetDevObjects(rtables, netDeviceLogic);
+        devs.add(dev1);
     }
     public Host withNets(int n) {
-        for (int i = nets.size(); i < n; i++)
-            addNet();
+        for (int i = devs.size(); i < n; i++)
+            addNetDev();
         return this;
     }
-    public Network addNet() {
-        Network net = new Network(rtables, packetTypes);
-        nets.add(net);
+    public NetDevObjects addNetDev() {
+        NetDevObjects net = new NetDevObjects(rtables, netDeviceLogic);
+        devs.add(net);
         return net;
+    }
+    public Bridge addBridge() {
+        return new Bridge(netDeviceLogic);
     }
 
     public ArpTable getArpTable() {

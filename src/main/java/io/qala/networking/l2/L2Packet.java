@@ -49,4 +49,10 @@ public class L2Packet {
     public NetDevice getDev() {
         return dev;
     }
+    /**
+     * It's possible that the device is changed during the processing (e.g. in bridge)
+     */
+    public void setDev(NetDevice dev) {
+        this.dev = dev;
+    }
 }
