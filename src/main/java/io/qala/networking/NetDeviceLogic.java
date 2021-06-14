@@ -14,6 +14,8 @@ public class NetDeviceLogic {
      * <a href="https://elixir.bootlin.com/linux/v5.12.1/source/net/core/dev.c#L5478">__netif_receive_skb()</a> ->
      * <a href="https://elixir.bootlin.com/linux/v5.12.1/source/net/core/dev.c#L5376"> __netif_receive_skb_one_core()</a> ->
      * <a href="https://elixir.bootlin.com/linux/v5.12.1/source/net/core/dev.c#L5174">__netif_receive_skb_core()</a>
+     *
+     * See <a href="https://www.programmersought.com/article/48945953151/">More comments on Kernel source code</a>.
      */
     public void receive(L2Packet l2) {
         RxHandlerResult ret = l2.getDev().getRxHandler().handle(l2);//https://elixir.bootlin.com/linux/v5.12.1/source/net/core/dev.c#L5274

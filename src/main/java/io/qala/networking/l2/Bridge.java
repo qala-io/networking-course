@@ -37,6 +37,7 @@ public class Bridge {
 
     /**
      * <a href="https://elixir.bootlin.com/linux/v5.12.1/source/net/bridge/br_input.c#L33">br_pass_frame_up</a>
+     * <a href="https://www.programmersought.com/article/9055656725/">More comments</a>
      */
     public void handleFrameFinish(L2Packet l2) {
         macToDev.put(l2.src(), l2.getDev());
@@ -49,6 +50,9 @@ public class Bridge {
             // broadcast won't be in the table either, so no need to do an explicit check - it'll get here anyway
             flood(l2);
     }
+    /**
+     * <a href="https://www.programmersought.com/article/5995656527/">More comments</a>
+     */
     private void passFrameUp(L2Packet l2) {
         // If we didn't change the device, it would invoke netdev logic again, which would again check
         // for rx_hanlder and that would call this bridge again, so we'd go in circles. By changing
