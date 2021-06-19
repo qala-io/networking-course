@@ -1,7 +1,7 @@
 package io.qala.networking.ipv4;
 
 import io.qala.networking.Bytes;
-import io.qala.networking.NetDevice;
+import io.qala.networking.dev.NetDevice;
 import io.qala.networking.TrafficStats;
 import io.qala.networking.l2.L2Packet;
 import io.qala.networking.l2.Mac;
@@ -46,7 +46,7 @@ public class IpPacketType implements PacketType {
             throw RoutingException.networkUnreachable();
         if(rt.isLocal()) {
             NetDevice dev = rt.getDev();
-            ipLocalDeliver(dev, new IpPacket(dev.getMac(), dev.getIpAddress(), dev.getMac(), dst, body));
+            ipLocalDeliver(dev, new IpPacket(dev.getHardwareAddress(), dev.getIpAddress(), dev.getHardwareAddress(), dst, body));
         } else {
             ipSendRemotely(dst, rt, body);
         }
@@ -85,7 +85,7 @@ public class IpPacketType implements PacketType {
         NetDevice dev = route.getDev();
         IpAddress nextHop = route.getNextHopFor(dst);
         Mac neighbor = arpTable.getNeighbor(nextHop, dev);
-        IpPacket ipPacket = new IpPacket(dev.getMac(), dev.getIpAddress(), neighbor, dst, body);
+        IpPacket ipPacket = new IpPacket(dev.getHardwareAddress(), dev.getIpAddress(), neighbor, dst, body);
         dev.send(ipPacket.toL2());
     }
     public TrafficStats getTrafficStats() {

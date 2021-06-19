@@ -1,7 +1,7 @@
 package io.qala.networking.ipv4;
 
 import io.qala.networking.Loggers;
-import io.qala.networking.NetDevice;
+import io.qala.networking.dev.NetDevice;
 
 import java.util.Comparator;
 import java.util.HashMap;

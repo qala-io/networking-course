@@ -1,5 +1,6 @@
 package io.qala.networking;
 
+import io.qala.networking.dev.NetDevice;
 import io.qala.networking.ipv4.*;
 import org.junit.Test;
 

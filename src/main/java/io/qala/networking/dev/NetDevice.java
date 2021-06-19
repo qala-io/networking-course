@@ -1,5 +1,6 @@
-package io.qala.networking;
+package io.qala.networking.dev;
 
+import io.qala.networking.Loggers;
 import io.qala.networking.ipv4.*;
 import io.qala.networking.l1.NicDriver;
 import io.qala.networking.l2.L2Packet;
@@ -13,6 +14,7 @@ public class NetDevice {
     private final String name;
     private final FibTableList fib;
     private final NicDriver nic;
+    private final Mac hardwareAddress;
     private final NetDevSender sender;
     private final PacketType[] packetTypes;
 
@@ -32,12 +34,15 @@ public class NetDevice {
         this.fib = null;
         this.nic = null;
         this.packetTypes = null;
+        // virtual devices like bridges also require MAC even though they don't have a physical device to connect to
+        this.hardwareAddress = Mac.random();
         this.name = name;
     }
     public NetDevice(NicDriver nic, NetDevSender sender, FibTableList fib, PacketType[] packetTypes) {
         this.sender = sender;
         this.packetTypes = packetTypes;
         this.name = "eth" + counter++;
+        this.hardwareAddress = nic.getMac();
         this.nic = nic;
         this.fib = fib;
         Loggers.TERMINAL_COMMANDS.info("ip link add {} type eth??", name);
@@ -50,8 +55,8 @@ public class NetDevice {
         new NetDeviceLogic(packetTypes).receive(l2);
     }
 
-    public Mac getMac() {
-        return nic.getMac();
+    public Mac getHardwareAddress() {
+        return hardwareAddress;
     }
     public IpAddress getIpAddress() {// let's just return the 1st address available for simplicity
         return ipAddresses.iterator().next().getAddress();

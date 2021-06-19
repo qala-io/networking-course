@@ -1,6 +1,6 @@
 package io.qala.networking.ipv4;
 
-import io.qala.networking.NetDevice;
+import io.qala.networking.dev.NetDevice;
 import io.qala.networking.SpyNic;
 import io.qala.networking.l1.Cable;
 import io.qala.networking.l2.L2Packet;

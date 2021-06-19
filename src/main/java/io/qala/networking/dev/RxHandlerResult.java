@@ -1,4 +1,4 @@
-package io.qala.networking;
+package io.qala.networking.dev;
 
 /**
  * <a href="https://elixir.bootlin.com/linux/v5.12.1/source/include/linux/netdevice.h#L429">rx_handler_result</a>

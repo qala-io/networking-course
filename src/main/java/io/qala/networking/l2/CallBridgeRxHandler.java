@@ -1,7 +1,7 @@
 package io.qala.networking.l2;
 
-import io.qala.networking.RxHandler;
-import io.qala.networking.RxHandlerResult;
+import io.qala.networking.dev.RxHandler;
+import io.qala.networking.dev.RxHandlerResult;
 
 class CallBridgeRxHandler implements RxHandler {
     private final Bridge bridge;

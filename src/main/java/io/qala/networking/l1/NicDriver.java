@@ -1,6 +1,6 @@
 package io.qala.networking.l1;
 
-import io.qala.networking.NetDevice;
+import io.qala.networking.dev.NetDevice;
 import io.qala.networking.l2.L2Packet;
 import io.qala.networking.l2.Mac;
 

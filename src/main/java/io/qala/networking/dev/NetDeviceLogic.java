@@ -1,5 +1,6 @@
-package io.qala.networking;
+package io.qala.networking.dev;
 
+import io.qala.networking.LogPadding;
 import io.qala.networking.ipv4.PacketType;
 import io.qala.networking.l2.L2Packet;
 

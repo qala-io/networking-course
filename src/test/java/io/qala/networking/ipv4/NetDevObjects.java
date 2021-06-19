@@ -1,8 +1,7 @@
 package io.qala.networking.ipv4;
 
-import io.qala.networking.NetDevice;
-import io.qala.networking.NetDeviceLogic;
-import io.qala.networking.PhysicalDeviceSender;
+import io.qala.networking.dev.NetDevice;
+import io.qala.networking.dev.PhysicalDeviceSender;
 import io.qala.networking.l1.NicDriver;
 import io.qala.networking.l1.NicMicrocontroller;
 

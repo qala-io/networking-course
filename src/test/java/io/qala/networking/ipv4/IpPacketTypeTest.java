@@ -48,7 +48,7 @@ public class IpPacketTypeTest {
 
         host.dev1.eth.receive(new IpPacket(
                 Mac.random(), IpAddress.random(),
-                host.dev1.dev.getMac(), externalNetwork.ipAddress,
+                host.dev1.dev.getHardwareAddress(), externalNetwork.ipAddress,
                 new Bytes()).toL2().toBytes());
         assertEquals(0, host.getIpStats().getReceivedCount());
     }
@@ -62,7 +62,7 @@ public class IpPacketTypeTest {
 
         host1.dev1.eth.receive(new IpPacket(
                 Mac.random(), IpAddress.random(),
-                host1.dev1.dev.getMac(), host2.dev1.ipAddress,
+                host1.dev1.dev.getHardwareAddress(), host2.dev1.ipAddress,
                 new Bytes()).toL2().toBytes());
         assertEquals(1, host1.getIpStats().getForwardedPackets(host1net2.dev).size());
         assertEquals(1, host2.getIpStats().getReceivedPackets(host2.dev1.dev).size());

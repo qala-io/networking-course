@@ -1,7 +1,7 @@
 package io.qala.networking.l2;
 
 import io.qala.networking.Bytes;
-import io.qala.networking.NetDevice;
+import io.qala.networking.dev.NetDevice;
 
 /**
  * This is an analogy to skb_buff struct, see <a href="https://www.programmersought.com/article/47825894963/">comments</a>.

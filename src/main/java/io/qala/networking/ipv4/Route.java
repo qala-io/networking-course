@@ -1,6 +1,6 @@
 package io.qala.networking.ipv4;
 
-import io.qala.networking.NetDevice;
+import io.qala.networking.dev.NetDevice;
 
 public class Route {
     /**

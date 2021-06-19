@@ -1,6 +1,6 @@
 package io.qala.networking;
 
-import io.qala.networking.ipv4.IpPacket;
+import io.qala.networking.dev.NetDevice;
 import io.qala.networking.l2.L2Packet;
 
 import java.util.ArrayList;

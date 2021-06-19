@@ -1,4 +1,4 @@
-package io.qala.networking;
+package io.qala.networking.dev;
 
 import io.qala.networking.l1.NicDriver;
 import io.qala.networking.l2.L2Packet;

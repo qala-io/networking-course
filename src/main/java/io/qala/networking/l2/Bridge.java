@@ -1,6 +1,10 @@
 package io.qala.networking.l2;
 
 import io.qala.networking.*;
+import io.qala.networking.dev.BridgeSender;
+import io.qala.networking.dev.NetDevice;
+import io.qala.networking.dev.NetDeviceLogic;
+import io.qala.networking.dev.RxHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,12 +33,14 @@ public class Bridge {
     }
     public void addInterface(NetDevice dev) {
         rxHandlerRegister(dev);//https://elixir.bootlin.com/linux/v5.12.1/source/net/bridge/br_if.c#L636
-        macToDev.put(dev.getMac(), dev);
+        macToDev.put(dev.getHardwareAddress(), dev);
         if(ports.containsKey(dev))
             throw new RuntimeException("" + (-ErrNumbers.EBUSY.code));
-        ports.put(dev, dev.getMac());
+        ports.put(dev, dev.getHardwareAddress());
     }
-
+    public NetDevice getInterface(Mac mac) {
+        return macToDev.get(mac);
+    }
     /**
      * <a href="https://elixir.bootlin.com/linux/v5.12.1/source/net/bridge/br_input.c#L33">br_pass_frame_up</a>
      * <a href="https://www.programmersought.com/article/9055656725/">More comments</a>

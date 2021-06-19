@@ -1,6 +1,7 @@
 package io.qala.networking.l2;
 
 import io.qala.networking.Bytes;
+import io.qala.networking.SpyNic;
 import io.qala.networking.ipv4.ArpPacket;
 import io.qala.networking.ipv4.Host;
 import io.qala.networking.ipv4.IpAddress;
@@ -14,7 +15,7 @@ import static org.junit.Assert.assertEquals;
 public class BridgeTest {
     @Test public void arpRequestIsBroadcastedToEveryPortAcceptTheSender() {
         Host h = new Host();
-        io.qala.networking.SpyNic spyNic = new io.qala.networking.SpyNic();
+        SpyNic spyNic = new SpyNic();
         new Cable(spyNic, h.dev1.eth);
         Bridge br = h.addBridge();
         br.addInterface(h.dev1.dev);
@@ -27,11 +28,11 @@ public class BridgeTest {
         // check first ARP reply
         ArpPacket arpReply = new ArpPacket(new L2Packet(receivedPackets.get(0), null));
         assertEquals(h.devs.get(1).ipAddress, arpReply.srcIp());
-        assertEquals(h.devs.get(1).dev.getMac(), arpReply.srcMac());
+        assertEquals(h.devs.get(1).dev.getHardwareAddress(), arpReply.srcMac());
         // check 2nd ARP reply
         arpReply = new ArpPacket(new L2Packet(receivedPackets.get(1), null));
         assertEquals(h.devs.get(2).ipAddress, arpReply.srcIp());
-        assertEquals(h.devs.get(2).dev.getMac(), arpReply.srcMac());
+        assertEquals(h.devs.get(2).dev.getHardwareAddress(), arpReply.srcMac());
     }
     @Test public void routesArpReplyToSpecificMac() {
 //        SpyNic[] nics = new SpyNic[]{new SpyNic(), new SpyNic(), new SpyNic()};

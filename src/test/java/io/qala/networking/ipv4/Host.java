@@ -1,7 +1,7 @@
 package io.qala.networking.ipv4;
 
 import io.qala.networking.Loggers;
-import io.qala.networking.NetDeviceLogic;
+import io.qala.networking.dev.NetDeviceLogic;
 import io.qala.networking.TrafficStats;
 import io.qala.networking.l2.Bridge;
 
