@@ -24,7 +24,7 @@ public class Bridge {
 
     public Bridge(NetDeviceLogic netDeviceLogic) {
         this.netDeviceLogic = netDeviceLogic;
-        this.brdev = new NetDevice("br" + count++);
+        this.brdev = new NetDevice("br" + count++, new BridgeSender(this));
         this.brdev.rxHandlerRegister(new RxHandler.NoOpRxHandler());
     }
     public void addInterface(NetDevice dev) {

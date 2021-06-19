@@ -34,8 +34,8 @@ public class BridgeTest {
         assertEquals(h.devs.get(2).dev.getMac(), arpReply.srcMac());
     }
     @Test public void routesArpReplyToSpecificMac() {
-        SpyNic[] nics = new SpyNic[]{new SpyNic(), new SpyNic(), new SpyNic()};
-        Mac src = Mac.random();
+//        SpyNic[] nics = new SpyNic[]{new SpyNic(), new SpyNic(), new SpyNic()};
+//        Mac src = Mac.random();
 //        Bridge bridge = new Bridge(nics);
 //        ArpPacket request = ArpPacket.req(src, IpAddress.random(), Mac.BROADCAST, IpAddress.random());
 //

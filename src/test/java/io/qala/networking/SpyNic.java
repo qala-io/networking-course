@@ -1,13 +1,14 @@
 package io.qala.networking;
 
 import io.qala.networking.l1.Cable;
+import io.qala.networking.l1.NicMicrocontroller;
 import io.qala.networking.l2.L2Packet;
 import io.qala.networking.l2.Mac;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SpyNic implements Nic2 {
+public class SpyNic extends NicMicrocontroller {
     public List<Bytes> receivedPackets = new ArrayList<>();
 
     @Override
@@ -16,17 +17,13 @@ public class SpyNic implements Nic2 {
     }
 
     @Override
-    public void send(L2Packet l2) {
+    public void send(Bytes l2) {
 
     }
 
     @Override
     public Mac getMac() {
         return null;
-    }
-
-    @Override
-    public void connectLinuxDevice(NetDevice dev) {
     }
 
     @Override

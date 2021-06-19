@@ -70,7 +70,7 @@ public class ArpPacketTypeTest {
         new Cable(host1.dev1.eth, host2.dev1.eth);
 
         ArpPacket arpReq = ArpPacket.req(host1.dev1.eth.getMac(), host1.dev1.ipAddress, Mac.BROADCAST, host2.dev1.ipAddress);
-        host1.dev1.eth.send(arpReq.toL2());
+        host1.dev1.eth.send(arpReq.toL2().toBytes());
 
         assertEquals(host2.dev1.eth.getMac(), host1.getArpTable().getNeighbor(host2.dev1.ipAddress, host1.dev1.dev));
         assertEquals(host1.dev1.eth.getMac(), host2.getArpTable().getNeighbor(host1.dev1.ipAddress, host2.dev1.dev));

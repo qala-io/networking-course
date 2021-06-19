@@ -39,7 +39,7 @@ public class ArpPacketType implements PacketType {
             if(rt.isLocal())
                 // arp_send_dst() https://elixir.bootlin.com/linux/v5.12.1/source/net/ipv4/arp.c#L300
                 // netfilter NF_ARP_OUT
-                l2.getDev().send(arp.createReply(arp.dstMac()).toL2());
+                l2.getDev().send(arp.createReply(l2.getDev().getMac()).toL2());
             else if(ipForward)
                 rt.getDev().send(arp.toL2());
     }

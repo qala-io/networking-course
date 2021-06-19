@@ -1,20 +1,19 @@
 package io.qala.networking.l1;
 
 import io.qala.networking.Bytes;
-import io.qala.networking.Nic2;
 
 public class Cable {
-    private final Nic2 nic1, nic2;
+    private final NicMicrocontroller nic1, nic2;
 
-    public Cable(Nic2 nic1, Nic2 nic2) {
+    public Cable(NicMicrocontroller nic1, NicMicrocontroller nic2) {
         this.nic1 = nic1;
         this.nic2 = nic2;
         nic1.attachToCable(this);
         nic2.attachToCable(this);
     }
 
-    public void send(Nic2 from, Bytes bytes) {
-        Nic2 receiver;
+    public void send(NicMicrocontroller from, Bytes bytes) {
+        NicMicrocontroller receiver;
         if(nic1 == from)
             receiver = nic2;
         else if (nic2 == from)

@@ -1,6 +1,7 @@
 package io.qala.networking;
 
 import io.qala.networking.ipv4.*;
+import io.qala.networking.l1.NicDriver;
 import io.qala.networking.l2.L2Packet;
 import io.qala.networking.l2.Mac;
 
@@ -11,30 +12,42 @@ public class NetDevice {
     private static int counter = 0;
     private final String name;
     private final FibTableList fib;
-    private final Nic2 nic;
+    private final NicDriver nic;
+    private final NetDevSender sender;
+    private final PacketType[] packetTypes;
 
     /**
      * This is actually part of internet device, not just device.
      * <a href="https://elixir.bootlin.com/linux/v5.12.1/source/include/linux/inetdevice.h#L29">in_device->in_ifaddr</a>
      */
     private final Set<IpRange> ipAddresses = new HashSet<>();
+    /**
+     * Called before device logic for packet receiving is invoked so that it could steal the work from
+     * the device. Used e.g. for bridging ({@link io.qala.networking.l2.Bridge}).
+     */
     private RxHandler rxHandler = new RxHandler.NoOpRxHandler();
 
-    public NetDevice(String name) {
+    public NetDevice(String name, NetDevSender sender) {
+        this.sender = sender;
         this.fib = null;
         this.nic = null;
+        this.packetTypes = null;
         this.name = name;
     }
-    public NetDevice(Nic2 nic, FibTableList fib) {
+    public NetDevice(NicDriver nic, NetDevSender sender, FibTableList fib, PacketType[] packetTypes) {
+        this.sender = sender;
+        this.packetTypes = packetTypes;
         this.name = "eth" + counter++;
         this.nic = nic;
         this.fib = fib;
-        nic.connectLinuxDevice(this);
         Loggers.TERMINAL_COMMANDS.info("ip link add {} type eth??", name);
     }
 
     public void send(L2Packet l2) {
-        nic.send(l2);
+        sender.send(l2);
+    }
+    public void receive(L2Packet l2) {
+        new NetDeviceLogic(packetTypes).receive(l2);
     }
 
     public Mac getMac() {
@@ -55,7 +68,9 @@ public class NetDevice {
     public void rxHandlerRegister(RxHandler rxHandler) {
         this.rxHandler = rxHandler;
     }
-
+    public void enterPromiscuousMode() {
+        nic.enterPromiscuousMode();
+    }
     public RxHandler getRxHandler() {
         return rxHandler;
     }

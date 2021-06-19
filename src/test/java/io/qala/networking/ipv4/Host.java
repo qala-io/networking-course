@@ -18,7 +18,7 @@ public class Host {
     public Host() {
         packetTypes = PacketType.createAllPacketTypes(new ArpTable(), rtables);
         netDeviceLogic = new NetDeviceLogic(packetTypes);
-        dev1 = new NetDevObjects(rtables, netDeviceLogic);
+        dev1 = new NetDevObjects(rtables, packetTypes);
         devs.add(dev1);
     }
     public Host withNets(int n) {
@@ -27,7 +27,7 @@ public class Host {
         return this;
     }
     public NetDevObjects addNetDev() {
-        NetDevObjects net = new NetDevObjects(rtables, netDeviceLogic);
+        NetDevObjects net = new NetDevObjects(rtables, packetTypes);
         devs.add(net);
         return net;
     }

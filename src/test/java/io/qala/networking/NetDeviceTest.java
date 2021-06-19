@@ -6,18 +6,17 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class NetDeviceTest {
-    @Test public void addsDeviceIpAddressToRoutingTables() {
-        FibTableList rtables = new FibTableList();
-
+    @Test public void addsDeviceIpAddressToRoutingTables_whenSettingDeviceIpAddress() {
         IpRange network = IpRange.randomAddressInRange();
-        NetDevice dev = new NetDevice(new SpyNic(), rtables);
+        Host host = new Host();
+        NetDevice dev = host.dev1.dev;
         dev.addIpAddress(network);
 
-        Route local = rtables.local().lookup(network.getAddress());
+        Route local = host.getRoutingTables().local().lookup(network.getAddress());
         assertEquals(network.getAddress(), local.getDestination().getAddress());
         assertSame(dev, local.getDev());
 
-        Route remote = rtables.main().lookup(network.getAddress());
+        Route remote = host.getRoutingTables().main().lookup(network.getAddress());
         assertNotEquals(network, remote.getDestination());
         assertEquals(network.toSubnet(), remote.getDestination());
         assertSame(dev, remote.getDev());

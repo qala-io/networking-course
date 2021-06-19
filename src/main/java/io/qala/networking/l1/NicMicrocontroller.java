@@ -1,22 +1,24 @@
-package io.qala.networking;
+package io.qala.networking.l1;
 
-import io.qala.networking.l1.Cable;
+import io.qala.networking.Bytes;
 import io.qala.networking.l2.L2Packet;
 import io.qala.networking.l2.Mac;
 
-public class EthNic implements Nic2 {
+public class NicMicrocontroller {
     private final Mac mac;
-    private NetDevice dev;
-    private final NetDeviceLogic devLogic;
-    private boolean promiscuous;
+    private NicDriver driver;
     private Cable cable;
+    private boolean promisc;
 
-    public EthNic(NetDeviceLogic devLogic) {
-        this(Mac.random(), devLogic);
+    public NicMicrocontroller() {
+        this(Mac.random());
     }
-    public EthNic(Mac mac, NetDeviceLogic devLogic) {
+    public NicMicrocontroller(Mac mac) {
         this.mac = mac;
-        this.devLogic = devLogic;
+    }
+
+    public void attachToCable(Cable cable) {
+        this.cable = cable;
     }
     /**
      * P.13 https://www.cs.dartmouth.edu/~sergey/netreads/path-of-packet/Network_stack.pdf
@@ -30,32 +32,23 @@ public class EthNic implements Nic2 {
      * </pre>
      */
     public void receive(Bytes l2Bytes) {
-        L2Packet l2 = new L2Packet(l2Bytes, dev);
+        L2Packet l2 = new L2Packet(l2Bytes, null);
         l2.setToUs(l2.dst().equals(mac));
-        if(l2.isToUs() || l2.dst().isBroadcast() || promiscuous)
-            devLogic.receive(l2);
+        if(l2.isToUs() || l2.dst().isBroadcast() || promisc)
+            driver.receive(l2);
     }
-    public void send(L2Packet l2) {
-        cable.send(this, l2.toBytes());
+    public void send(Bytes bytes) {
+        cable.send(this, bytes);
     }
-    @Override
+
+    public void enterPromiscMode() {
+        this.promisc = true;
+    }
+    public void setDriver(NicDriver driver) {
+        this.driver = driver;
+    }
+
     public Mac getMac() {
         return mac;
-    }
-
-    public void enterPromiscuousMode() {
-        this.promiscuous = true;
-    }
-    public void attachToCable(Cable cable) {
-        this.cable = cable;
-    }
-
-    public void connectLinuxDevice(NetDevice dev) {
-        this.dev = dev;
-    }
-
-    @Override
-    public String toString() {
-        return "NIC(" + mac + ")";
     }
 }
