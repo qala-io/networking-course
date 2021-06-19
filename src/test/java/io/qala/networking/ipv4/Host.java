@@ -1,38 +1,55 @@
 package io.qala.networking.ipv4;
 
 import io.qala.networking.Loggers;
-import io.qala.networking.dev.NetDeviceLogic;
 import io.qala.networking.TrafficStats;
+import io.qala.networking.dev.BridgeSender;
+import io.qala.networking.dev.NetDevice;
 import io.qala.networking.l2.Bridge;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.qala.datagen.RandomShortApi.numeric;
 
 public class Host {
     private final FibTableList rtables = new FibTableList();
     public final NetDevObjects dev1;
     public final List<NetDevObjects> devs = new ArrayList<>();
     public final PacketType[] packetTypes;
-    private final NetDeviceLogic netDeviceLogic;
 
     public Host() {
+        this("eth" + numeric(3));
+    }
+    public Host(String devname) {
         packetTypes = PacketType.createAllPacketTypes(new ArpTable(), rtables);
-        netDeviceLogic = new NetDeviceLogic(packetTypes);
-        dev1 = new NetDevObjects(rtables, packetTypes);
-        devs.add(dev1);
+        dev1 = addNetDev(devname);
     }
     public Host withNets(int n) {
         for (int i = devs.size(); i < n; i++)
             addNetDev();
         return this;
     }
-    public NetDevObjects addNetDev() {
-        NetDevObjects net = new NetDevObjects(rtables, packetTypes);
+    public NetDevObjects addNetDev(String name) {
+        NetDevObjects net = new NetDevObjects(name, rtables, packetTypes);
         devs.add(net);
         return net;
     }
-    public Bridge addBridge() {
-        return new Bridge(netDeviceLogic);
+    public NetDevObjects addNetDev() {
+        return addNetDev("eth" + numeric(3));
+    }
+    public Bridge addBridge(String name) {
+        BridgeSender brSender = new BridgeSender();
+        NetDevice brdev = new NetDevice(name, brSender, packetTypes);
+        Bridge bridge = new Bridge(brdev);
+        brSender.setBridge(bridge);
+        this.devs.add(new NetDevObjects(brdev, packetTypes));
+        return bridge;
+    }
+    public NetDevObjects dev(String name) {
+        for (NetDevObjects dev : devs)
+            if (dev.dev.toString().equals(name))
+                return dev;
+        throw new IllegalArgumentException("Couldn't find " + name);
     }
 
     public ArpTable getArpTable() {

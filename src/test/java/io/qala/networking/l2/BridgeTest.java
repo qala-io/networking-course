@@ -14,25 +14,25 @@ import static org.junit.Assert.assertEquals;
 
 public class BridgeTest {
     @Test public void arpRequestIsBroadcastedToEveryPortAcceptTheSender() {
-        Host h = new Host();
+        Host h = new Host("eth0");
         SpyNic spyNic = new SpyNic();
         new Cable(spyNic, h.dev1.eth);
-        Bridge br = h.addBridge();
+        Bridge br = h.addBridge("br0");
         br.addInterface(h.dev1.dev);
-        br.addInterface(h.addNetDev().dev);
-        br.addInterface(h.addNetDev().dev);
+        br.addInterface(h.addNetDev("eth1").dev);
+        br.addInterface(h.addNetDev("eth2").dev);
 
-        h.dev1.eth.receive(ArpPacket.req(Mac.random(), IpAddress.random(), Mac.BROADCAST, h.devs.get(1).ipAddress).toL2().toBytes());
+        h.dev("eth0").eth.receive(ArpPacket.req(Mac.random(), IpAddress.random(), Mac.BROADCAST, h.dev("eth1").ipAddress).toL2().toBytes());
         List<Bytes> receivedPackets = spyNic.receivedPackets;
         assertEquals(2, receivedPackets.size());
         // check first ARP reply
         ArpPacket arpReply = new ArpPacket(new L2Packet(receivedPackets.get(0), null));
-        assertEquals(h.devs.get(1).ipAddress, arpReply.srcIp());
-        assertEquals(h.devs.get(1).dev.getHardwareAddress(), arpReply.srcMac());
-        // check 2nd ARP reply
+        assertEquals(h.dev("eth1").ipAddress, arpReply.srcIp());
+        assertEquals(h.dev("br0").dev.getHardwareAddress(), arpReply.srcMac());
+        // check 2nd ARP reply, since IP address belongs to the same host - other devices also would respond even if it's not their IP address
         arpReply = new ArpPacket(new L2Packet(receivedPackets.get(1), null));
-        assertEquals(h.devs.get(2).ipAddress, arpReply.srcIp());
-        assertEquals(h.devs.get(2).dev.getHardwareAddress(), arpReply.srcMac());
+        assertEquals(h.dev("eth1").ipAddress, arpReply.srcIp());
+        assertEquals(h.dev("br0").dev.getHardwareAddress(), arpReply.srcMac());
     }
     @Test public void routesArpReplyToSpecificMac() {
 //        SpyNic[] nics = new SpyNic[]{new SpyNic(), new SpyNic(), new SpyNic()};

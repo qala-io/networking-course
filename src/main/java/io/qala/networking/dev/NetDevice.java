@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class NetDevice {
-    private static int counter = 0;
     private final String name;
     private final FibTableList fib;
     private final NicDriver nic;
@@ -29,19 +28,19 @@ public class NetDevice {
      */
     private RxHandler rxHandler = new RxHandler.NoOpRxHandler();
 
-    public NetDevice(String name, NetDevSender sender) {
+    public NetDevice(String name, NetDevSender sender, PacketType[] packetTypes) {
         this.sender = sender;
         this.fib = null;
         this.nic = null;
-        this.packetTypes = null;
+        this.packetTypes = packetTypes;
         // virtual devices like bridges also require MAC even though they don't have a physical device to connect to
         this.hardwareAddress = Mac.random();
         this.name = name;
     }
-    public NetDevice(NicDriver nic, NetDevSender sender, FibTableList fib, PacketType[] packetTypes) {
+    public NetDevice(String name, NicDriver nic, NetDevSender sender, FibTableList fib, PacketType[] packetTypes) {
         this.sender = sender;
         this.packetTypes = packetTypes;
-        this.name = "eth" + counter++;
+        this.name = name;
         this.hardwareAddress = nic.getMac();
         this.nic = nic;
         this.fib = fib;

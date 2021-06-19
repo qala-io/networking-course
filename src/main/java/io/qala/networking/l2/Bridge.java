@@ -19,16 +19,14 @@ public class Bridge {
     private static int count;
     /** Bridge's own device. */
     private final NetDevice brdev;
-    private final NetDeviceLogic netDeviceLogic;
     private final Map<Mac, NetDevice> macToDev = new HashMap<>();
     /**
      * We don't introduce a class {@code Port} to keep things simple, it's easier to reference device directly.
      */
     private final Map<NetDevice, Mac> ports = new HashMap<>();
 
-    public Bridge(NetDeviceLogic netDeviceLogic) {
-        this.netDeviceLogic = netDeviceLogic;
-        this.brdev = new NetDevice("br" + count++, new BridgeSender(this));
+    public Bridge(NetDevice brdev) {
+        this.brdev = brdev;
         this.brdev.rxHandlerRegister(new RxHandler.NoOpRxHandler());
     }
     public void addInterface(NetDevice dev) {
@@ -68,7 +66,7 @@ public class Bridge {
         //NF_HOOK(NFPROTO_BRIDGE, NF_BR_LOCAL_IN,
         //		       dev_net(indev), NULL, skb, indev, NULL,
         //		       br_netif_receive_skb)
-        netDeviceLogic.receive(l2);
+        brdev.receive(l2);
     }
     //https://elixir.bootlin.com/linux/v5.12.1/source/net/bridge/br_input.c#L168
     private void flood(L2Packet l2) {
