@@ -5,6 +5,7 @@ import io.qala.networking.SpyNic;
 import io.qala.networking.ipv4.ArpPacket;
 import io.qala.networking.ipv4.Host;
 import io.qala.networking.ipv4.IpAddress;
+import io.qala.networking.ipv4.IpPacket;
 import io.qala.networking.l1.Cable;
 import org.junit.Test;
 
@@ -29,11 +30,11 @@ public class BridgeTest {
         // check first ARP reply
         ArpPacket arpReply = new ArpPacket(new L2Packet(receivedPackets.get(0), null));
         assertEquals(h.dev("eth1").ipAddress, arpReply.srcIp());
-        assertEquals(h.dev("br0").dev.getHardwareAddress(), arpReply.srcMac());
+        assertEquals(h.dev("eth1").dev.getHardwareAddress(), arpReply.srcMac());
         // check 2nd ARP reply, since IP address belongs to the same host - other devices also would respond even if it's not their IP address
         arpReply = new ArpPacket(new L2Packet(receivedPackets.get(1), null));
         assertEquals(h.dev("eth1").ipAddress, arpReply.srcIp());
-        assertEquals(h.dev("br0").dev.getHardwareAddress(), arpReply.srcMac());
+        assertEquals(h.dev("eth2").dev.getHardwareAddress(), arpReply.srcMac());
     }
     @Test public void routesArpReplyToSpecificMac() {
         Host h = new Host("eth0");
@@ -52,5 +53,22 @@ public class BridgeTest {
         assertTrue(arpReply.isReply());
         assertEquals(request.srcMac(), arpReply.dstMac());
         assertEquals(h.dev("eth1").ipAddress, arpReply.srcIp());
+    }
+
+    @Test public void deliversIpPacketsThroughBridgeToTargetEth() {
+        Host h = new Host("eth0");
+        new Cable(new SpyNic(), h.dev1.eth);
+        Bridge br = h.addBridge("br0");
+        br.addInterface(h.dev1.dev);
+        br.addInterface(h.addNetDev("eth1").dev);
+
+        IpPacket ipPacket = new IpPacket(
+                Mac.random(), IpAddress.random(),
+                h.dev("eth1").eth.getMac(), h.dev("eth1").ipAddress,
+                new Bytes());
+        h.dev("eth0").eth.receive(ipPacket.toL2().toBytes());
+
+        List<L2Packet> eth1Received = h.getIpStats().getReceivedPackets(h.dev("eth1").dev);
+        assertEquals(1, eth1Received.size());
     }
 }

@@ -1,9 +1,8 @@
 package io.qala.networking.l2;
 
-import io.qala.networking.*;
-import io.qala.networking.dev.BridgeSender;
+import io.qala.networking.ErrNumbers;
+import io.qala.networking.Loggers;
 import io.qala.networking.dev.NetDevice;
-import io.qala.networking.dev.NetDeviceLogic;
 import io.qala.networking.dev.RxHandler;
 
 import java.util.HashMap;
@@ -16,7 +15,6 @@ import java.util.Map;
  * Also see <a href="https://www.programmersought.com/article/5995656527/">an awesome article that describe Kernel code</a>
  */
 public class Bridge {
-    private static int count;
     /** Bridge's own device. */
     private final NetDevice brdev;
     private final Map<Mac, NetDevice> macToDev = new HashMap<>();
@@ -26,6 +24,7 @@ public class Bridge {
     private final Map<NetDevice, Mac> ports = new HashMap<>();
 
     public Bridge(NetDevice brdev) {
+        Loggers.TERMINAL_COMMANDS.info("$ ip link add {} type bridge", brdev);
         this.brdev = brdev;
         this.brdev.rxHandlerRegister(new RxHandler.NoOpRxHandler());
     }
@@ -35,6 +34,7 @@ public class Bridge {
         if(ports.containsKey(dev))
             throw new RuntimeException("" + (-ErrNumbers.EBUSY.code));
         ports.put(dev, dev.getHardwareAddress());
+        dev.enterPromiscuousMode();
     }
     public NetDevice getInterface(Mac mac) {
         return macToDev.get(mac);
