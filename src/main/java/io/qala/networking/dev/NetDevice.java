@@ -28,6 +28,7 @@ public class NetDevice {
      */
     private RxHandler rxHandler = new RxHandler.NoOpRxHandler();
 
+    /** Virtual device */
     public NetDevice(String name, NetDevSender sender, PacketType[] packetTypes) {
         this.sender = sender;
         this.fib = null;
@@ -37,6 +38,7 @@ public class NetDevice {
         this.hardwareAddress = Mac.random();
         this.name = name;
     }
+    /** Physical device */
     public NetDevice(String name, EthNicDriver nic, NetDevSender sender, FibTableList fib, PacketType[] packetTypes) {
         this.sender = sender;
         this.packetTypes = packetTypes;
@@ -66,7 +68,6 @@ public class NetDevice {
         // in reality this happens only if the interface is UP
         fib.main().add(new Route(range.toSubnet(), null, this, RouteType.REMOTE));
         ipAddresses.add(range);
-        // for now we just log the network, but we also need to let routing table read it
         Loggers.TERMINAL_COMMANDS.info("ip addr add {} dev {}", range, name);
     }
     public void rxHandlerRegister(RxHandler rxHandler) {
