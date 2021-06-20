@@ -42,7 +42,7 @@ public class Host {
         NetDevice brdev = new NetDevice(name, brSender, packetTypes);
         Bridge bridge = new Bridge(brdev);
         brSender.setBridge(bridge);
-        this.devs.add(new NetDevObjects(brdev, packetTypes));
+        this.devs.add(new NetDevObjects(brdev));
         return bridge;
     }
     public NetDevObjects dev(String name) {

@@ -11,7 +11,7 @@ public class NetDevObjects {
     public NicMicrocontroller eth;
     public final NetDevice dev;
 
-    NetDevObjects(NetDevice dev, PacketType[] packetTypes) {// for bridge, since it doesn't have all the fields
+    NetDevObjects(NetDevice dev) {// for bridge, since it doesn't have all the fields
         this.dev = dev;
     }
     NetDevObjects(String devname, FibTableList rtables, PacketType[] packetTypes) {

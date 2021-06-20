@@ -11,6 +11,7 @@ import org.junit.Test;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class BridgeTest {
     @Test public void arpRequestIsBroadcastedToEveryPortAcceptTheSender() {
@@ -35,15 +36,21 @@ public class BridgeTest {
         assertEquals(h.dev("br0").dev.getHardwareAddress(), arpReply.srcMac());
     }
     @Test public void routesArpReplyToSpecificMac() {
-//        SpyNic[] nics = new SpyNic[]{new SpyNic(), new SpyNic(), new SpyNic()};
-//        Mac src = Mac.random();
-//        Bridge bridge = new Bridge(nics);
-//        ArpPacket request = ArpPacket.req(src, IpAddress.random(), Mac.BROADCAST, IpAddress.random());
-//
-//        bridge.route(nics[0], request.toL2());
-//        bridge.route(nics[1], request.createReply(Mac.random()).toL2());
-//        assertEquals(1, nics[0].receivedArpReplies());
-//        assertEquals(0, nics[1].receivedArpReplies());
-//        assertEquals(0, nics[2].receivedArpReplies());
+        Host h = new Host("eth0");
+        SpyNic spyNic = new SpyNic();
+        new Cable(spyNic, h.dev1.eth);
+        Bridge br = h.addBridge("br0");
+        br.addInterface(h.dev1.dev);
+        br.addInterface(h.addNetDev("eth1").dev);
+
+        ArpPacket request = ArpPacket.req(Mac.random(), IpAddress.random(), Mac.BROADCAST, h.dev("eth1").ipAddress);
+        h.dev("eth0").eth.receive(request.toL2().toBytes());
+
+        assertEquals(1, spyNic.receivedPackets.size());
+
+        ArpPacket arpReply = new ArpPacket(new L2Packet(spyNic.receivedPackets.get(0), null));
+        assertTrue(arpReply.isReply());
+        assertEquals(request.srcMac(), arpReply.dstMac());
+        assertEquals(h.dev("eth1").ipAddress, arpReply.srcIp());
     }
 }
