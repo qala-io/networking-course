@@ -7,11 +7,11 @@ import io.qala.networking.l2.Mac;
 /**
  * E.g. eth driver
  */
-public class NicDriver {
+public class EthNicDriver {
     private final NicMicrocontroller nic;
     private NetDevice dev;
 
-    public NicDriver(NicMicrocontroller nic) {
+    public EthNicDriver(NicMicrocontroller nic) {
         this.nic = nic;
     }
     public void setDevice(NetDevice dev) {
@@ -29,5 +29,8 @@ public class NicDriver {
     }
     public void enterPromiscuousMode() {
         this.nic.enterPromiscMode();
+    }
+    @Override public String toString() {
+        return "eth";
     }
 }

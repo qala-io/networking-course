@@ -2,7 +2,7 @@ package io.qala.networking.dev;
 
 import io.qala.networking.Loggers;
 import io.qala.networking.ipv4.*;
-import io.qala.networking.l1.NicDriver;
+import io.qala.networking.l1.EthNicDriver;
 import io.qala.networking.l2.L2Packet;
 import io.qala.networking.l2.Mac;
 
@@ -12,7 +12,7 @@ import java.util.Set;
 public class NetDevice {
     private final String name;
     private final FibTableList fib;
-    private final NicDriver nic;
+    private final EthNicDriver nic;
     private final Mac hardwareAddress;
     private final NetDevSender sender;
     private final PacketType[] packetTypes;
@@ -37,14 +37,14 @@ public class NetDevice {
         this.hardwareAddress = Mac.random();
         this.name = name;
     }
-    public NetDevice(String name, NicDriver nic, NetDevSender sender, FibTableList fib, PacketType[] packetTypes) {
+    public NetDevice(String name, EthNicDriver nic, NetDevSender sender, FibTableList fib, PacketType[] packetTypes) {
         this.sender = sender;
         this.packetTypes = packetTypes;
         this.name = name;
         this.hardwareAddress = nic.getMac();
         this.nic = nic;
         this.fib = fib;
-        Loggers.TERMINAL_COMMANDS.info("ip link add {} type eth??", name);
+        Loggers.TERMINAL_COMMANDS.info("ip link add {} type {}", name, nic);
     }
 
     public void send(L2Packet l2) {

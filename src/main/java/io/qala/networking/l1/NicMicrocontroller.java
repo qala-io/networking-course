@@ -6,7 +6,7 @@ import io.qala.networking.l2.Mac;
 
 public class NicMicrocontroller {
     private final Mac mac;
-    private NicDriver driver;
+    private EthNicDriver driver;
     private Cable cable;
     private boolean promisc;
 
@@ -44,7 +44,7 @@ public class NicMicrocontroller {
     public void enterPromiscMode() {
         this.promisc = true;
     }
-    public void setDriver(NicDriver driver) {
+    public void setDriver(EthNicDriver driver) {
         this.driver = driver;
     }
 
