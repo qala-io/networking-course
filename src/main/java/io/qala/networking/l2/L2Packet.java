@@ -29,6 +29,13 @@ public class L2Packet {
         this.dst = new Mac(packet.get(6, 12));
         this.payload = packet.get(12, packet.size());
     }
+    public L2Packet(L2Packet l2) {
+        this.dev = l2.dev;
+        this.src = l2.src;
+        this.dst = l2.dst;
+        this.payload = l2.payload;
+        this.toUs = l2.toUs;
+    }
 
     public Mac src() {
         return src;

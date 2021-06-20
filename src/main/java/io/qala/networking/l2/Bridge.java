@@ -71,8 +71,10 @@ public class Bridge {
     //https://elixir.bootlin.com/linux/v5.12.1/source/net/bridge/br_input.c#L168
     private void flood(L2Packet l2) {
         for (NetDevice nextDev : ports.keySet())
-            if (nextDev != l2.getDev())
-                passFrameUp(l2);// it doesn't actually call pass frame up when flooding, but for our purposes it's close enough
+            if (nextDev != l2.getDev()) {
+                L2Packet copy = new L2Packet(l2);//otherwise once the device is replaced with bridge - the if-condition above won't work
+                passFrameUp(copy);// it doesn't actually call pass frame up when flooding, but for our purposes it's close enough
+            }
     }
 
     /**
