@@ -30,6 +30,10 @@ public class BridgeTest {
         // check first ARP reply
         ArpPacket arpReply = new ArpPacket(new L2Packet(receivedPackets.get(0), null));
         assertEquals(h.dev("eth1").ipAddress, arpReply.srcIp());
+        // todo:
+        // it seems like there should be a bridge MAC: https://unix.stackexchange.com/questions/654241/how-does-arp-process-replies-to-the-right-device#comment1231562_654251
+        // but it's not clear how the next query that comes to this host will be "forwarded" to the right port
+        // if it's going to contain Bridge MAC instead of eth1 MAC
         assertEquals(h.dev("eth1").dev.getHardwareAddress(), arpReply.srcMac());
         // check 2nd ARP reply, since IP address belongs to the same host - other devices also would respond even if it's not their IP address
         arpReply = new ArpPacket(new L2Packet(receivedPackets.get(1), null));
